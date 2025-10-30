@@ -68,6 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //   // the App.build method, and use it to set our appbar title.
       //   title: Text(widget.title),
       // ),
+      backgroundColor: Color.fromARGB(255, 231, 96, 220),
       body: PododoroTimer(minutes: 0, seconds: 3),
       // floatingActionButton: FloatingActionButton(
       //   onPressed: _incrementCounter,

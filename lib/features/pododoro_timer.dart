@@ -14,21 +14,22 @@ class PododoroTimer extends StatefulWidget {
 class _PododoroTimerState extends State<PododoroTimer> {
   Timer? _mainTimer;
   Timer? _finalTimer;
-  int _secondsRemaining = 0;
-  int _minutesRemaining = 0;
+  int _remainingMinutes = 0;
+  int _remainingSeconds = 0;
   bool _isStartButtonVisible = true;
   bool _isTimerVisible = false;
-  bool _isCancelButtonVisible = false;
+  bool _areTimerButtonsVisible = false;
   double _timerOpacity = 1.0;
-  
-  /// Creates a timer object.
+  String _pauseButtonText = "Pause";
+
+  /// Creates a timer object based on the remaining seconds.
   Timer _createMainTimer() {
     return Timer.periodic(
       const Duration(seconds: 1), // Fires every second
       (timer) {
         setState(() {
-          if (_secondsRemaining > 0) {
-              _secondsRemaining--;
+          if (_remainingSeconds > 0) {
+              _remainingSeconds--;
           } else {
               timer.cancel();
               _finalTimer = _createFinalTimer();
@@ -38,9 +39,10 @@ class _PododoroTimerState extends State<PododoroTimer> {
     );
   }
 
+  /// Creates a timer object that will blink 00:00. This should only be called once the main timer is finished.
   Timer _createFinalTimer() {
     return Timer.periodic(
-      const Duration(milliseconds: 500),
+      const Duration(milliseconds: 650),
       (timer) {
         setState(() {
           _timerOpacity = _timerOpacity == 0.0 ? 1.0 : 0.0;
@@ -49,35 +51,47 @@ class _PododoroTimerState extends State<PododoroTimer> {
     );
   }
 
+  /// Pause the main timer if it is active. Otherwise, resume the main timer.
+  void _pauseTimer() {
+    setState(() {
+      if (_pauseButtonText == "Pause") {
+        _pauseButtonText = "Resume";
+        _mainTimer?.cancel();
+      } else {
+        _pauseButtonText = "Pause";
+
+        if (_remainingSeconds > 0) {
+          _mainTimer = _createMainTimer();
+        }
+      }
+    });
+  }
+
   /// Makes the start button visible and hides the timer and other displays.
-  void showStartButton() {
+  void _cancelTimer() {
     setState(() {
       _isStartButtonVisible = true;
       _isTimerVisible = false;
-      _isCancelButtonVisible = false;
+      _areTimerButtonsVisible = false;
       _finalTimer?.cancel(); 
     });
   }
 
-  /// Makes the timer and other displays visible and hides the start button.
-  void showTimer() {
+  /// Start the main timer.
+  /// Makes the start button invisible, and makes the timer buttons visible.
+  void _startMainTimer() {
     setState(() {
+      _mainTimer?.cancel();
+
       _isStartButtonVisible = false;
       _isTimerVisible = true;
-      _isCancelButtonVisible = true;      
-    });    
-  }
+      _areTimerButtonsVisible = true;
+      _pauseButtonText = "Pause";
+      _remainingSeconds = widget.seconds;
+      _remainingMinutes = widget.minutes;
 
-  void _startTimer() {
-    _mainTimer?.cancel();
-
-    setState(() {
-      _secondsRemaining = widget.seconds;
-      _minutesRemaining = widget.minutes;
-      _isCancelButtonVisible = true;
+      _mainTimer = _createMainTimer();
     });
-
-    _mainTimer = _createMainTimer();
   }
 
   /// Gets the display string for the time unit.
@@ -101,13 +115,12 @@ class _PododoroTimerState extends State<PododoroTimer> {
             visible: _isStartButtonVisible,
             child: ElevatedButton(
               onPressed: () {
-                showTimer();
-                _startTimer();
+                _startMainTimer();
               },
               style: ElevatedButton.styleFrom(
                 shape: const CircleBorder(),
                 minimumSize: const Size(200, 200),
-                backgroundColor: Colors.red,
+                backgroundColor: const Color.fromARGB(255, 238, 24, 9),
               ),
               child: const Text("Start"),
             ),
@@ -117,7 +130,7 @@ class _PododoroTimerState extends State<PododoroTimer> {
             child: Opacity(
               opacity: _timerOpacity,
               child: Text(
-                "${getTimeUnitDisplay(_minutesRemaining)}:${getTimeUnitDisplay(_secondsRemaining)}",
+                "${getTimeUnitDisplay(_remainingMinutes)}:${getTimeUnitDisplay(_remainingSeconds)}",
                 style: const TextStyle(
                   fontSize: 60,
                 )
@@ -125,10 +138,22 @@ class _PododoroTimerState extends State<PododoroTimer> {
             )
           ),
           Visibility(
-            visible: _isCancelButtonVisible,
-            child: ElevatedButton(
-              onPressed: () => showStartButton(),
-              child: const Text("Cancel")
+            visible: _areTimerButtonsVisible,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+              Container(
+                margin: const EdgeInsets.all(10),
+                child: ElevatedButton(
+                  onPressed: () => _remainingSeconds > 0 ? _pauseTimer() : null,
+                  child: Text(_pauseButtonText),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => _cancelTimer(),
+                child: const Text("Cancel")
+              ),
+              ],
             )
           )
         ]
