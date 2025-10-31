@@ -23,7 +23,7 @@ class _PododoroTimerState extends State<PododoroTimer> {
   double _timerOpacity = 1.0;
 
   Color _backgroundColor = Constants.defaultBackgroundColor;
-  IconData _pauseResumeIcon = Icons.pause;
+  IconData _pauseResumeIcon = Constants.pauseIcon;
   final ButtonStyle _iconButtonStyle = const ButtonStyle(iconSize: WidgetStatePropertyAll(50));
 
   /// Creates a timer object based on the remaining seconds.
@@ -58,11 +58,11 @@ class _PododoroTimerState extends State<PododoroTimer> {
   /// Pause the main timer if it is active. Otherwise, resume the main timer.
   void _pauseTimer() {
     setState(() {
-      if (_pauseResumeIcon == Icons.pause) {
-        _pauseResumeIcon = Icons.play_arrow_rounded;
+      if (_pauseResumeIcon == Constants.pauseIcon) {
+        _pauseResumeIcon = Constants.resumeIcon;
         _mainTimer?.cancel();
       } else {
-        _pauseResumeIcon = Icons.pause;
+        _pauseResumeIcon = Constants.pauseIcon;
 
         if (_remainingSeconds > 0) {
           _mainTimer = _createMainTimer();
@@ -92,7 +92,7 @@ class _PododoroTimerState extends State<PododoroTimer> {
       _isStartButtonVisible = false;
       _isTimerVisible = true;
       _areTimerButtonsVisible = true;
-      _pauseResumeIcon = Icons.pause;
+      _pauseResumeIcon = Constants.pauseIcon;
       _remainingSeconds = widget.seconds;
       _remainingMinutes = widget.minutes;
 
