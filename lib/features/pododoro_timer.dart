@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async' show Timer;
+import 'package:pododoro/constants.dart' show Constants;
 
 class PododoroTimer extends StatefulWidget {
   final int minutes;
@@ -21,6 +22,7 @@ class _PododoroTimerState extends State<PododoroTimer> {
   bool _areTimerButtonsVisible = false;
   double _timerOpacity = 1.0;
 
+  Color _backgroundColor = Constants.defaultBackgroundColor;
   IconData _pauseResumeIcon = Icons.pause;
   final ButtonStyle _iconButtonStyle = const ButtonStyle(iconSize: WidgetStatePropertyAll(50));
 
@@ -72,6 +74,7 @@ class _PododoroTimerState extends State<PododoroTimer> {
   /// Makes the start button visible and hides the timer and other displays.
   void _cancelTimer() {
     setState(() {
+      _backgroundColor = Constants.defaultBackgroundColor;
       _isStartButtonVisible = true;
       _isTimerVisible = false;
       _areTimerButtonsVisible = false;
@@ -85,6 +88,7 @@ class _PododoroTimerState extends State<PododoroTimer> {
     setState(() {
       _mainTimer?.cancel();
 
+      _backgroundColor = Constants.timerBackgroundColor;
       _isStartButtonVisible = false;
       _isTimerVisible = true;
       _areTimerButtonsVisible = true;
@@ -109,59 +113,62 @@ class _PododoroTimerState extends State<PododoroTimer> {
   
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Visibility(
-            visible: _isStartButtonVisible,
-            child: ElevatedButton(
-              onPressed: () {
-                _startMainTimer();
-              },
-              style: ElevatedButton.styleFrom(
-                shape: const CircleBorder(),
-                minimumSize: const Size(200, 200),
-                backgroundColor: const Color.fromARGB(255, 238, 24, 9),
+    return Container(
+      color: _backgroundColor,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Visibility(
+              visible: _isStartButtonVisible,
+              child: ElevatedButton(
+                onPressed: () {
+                  _startMainTimer();
+                },
+                style: ElevatedButton.styleFrom(
+                  shape: const CircleBorder(),
+                  minimumSize: const Size(200, 200),
+                  backgroundColor: const Color.fromARGB(255, 238, 24, 9),
+                ),
+                child: const Text("Start"),
               ),
-              child: const Text("Start"),
             ),
-          ),
-          Visibility(
-            visible: _isTimerVisible,
-            child: Opacity(
-              opacity: _timerOpacity,
-              child: Text(
-                "${getTimeUnitDisplay(_remainingMinutes)}:${getTimeUnitDisplay(_remainingSeconds)}",
-                style: const TextStyle(
-                  fontSize: 60,
-                )
-              ),
-            )
-          ),
-          Visibility(
-            visible: _areTimerButtonsVisible,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-              Container(
-                margin: const EdgeInsets.all(10),
-                child: IconButton(
-                  onPressed: () => _remainingSeconds > 0 ? _pauseTimer() : null,
-                  icon: Icon(_pauseResumeIcon),
+            Visibility(
+              visible: _isTimerVisible,
+              child: Opacity(
+                opacity: _timerOpacity,
+                child: Text(
+                  "${getTimeUnitDisplay(_remainingMinutes)}:${getTimeUnitDisplay(_remainingSeconds)}",
+                  style: const TextStyle(
+                    fontSize: 60,
+                  )
+                ),
+              )
+            ),
+            Visibility(
+              visible: _areTimerButtonsVisible,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                Container(
+                  margin: const EdgeInsets.all(10),
+                  child: IconButton(
+                    onPressed: () => _remainingSeconds > 0 ? _pauseTimer() : null,
+                    icon: Icon(_pauseResumeIcon),
+                    style: _iconButtonStyle
+                  )
+                ),
+                IconButton(
+                  onPressed: () => _cancelTimer(),
+                  icon: const Icon(Icons.cancel),
                   style: _iconButtonStyle
-                )
-              ),
-              IconButton(
-                onPressed: () => _cancelTimer(),
-                icon: const Icon(Icons.cancel),
-                style: _iconButtonStyle
-              ),
-              ],
+                ),
+                ],
+              )
             )
-          )
-        ]
-      )
+          ]
+        )
+      ),
     );
   }
 
