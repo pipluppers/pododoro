@@ -20,7 +20,9 @@ class _PododoroTimerState extends State<PododoroTimer> {
   bool _isTimerVisible = false;
   bool _areTimerButtonsVisible = false;
   double _timerOpacity = 1.0;
-  String _pauseButtonText = "Pause";
+
+  IconData _pauseResumeIcon = Icons.pause;
+  final ButtonStyle _iconButtonStyle = const ButtonStyle(iconSize: WidgetStatePropertyAll(50));
 
   /// Creates a timer object based on the remaining seconds.
   Timer _createMainTimer() {
@@ -54,11 +56,11 @@ class _PododoroTimerState extends State<PododoroTimer> {
   /// Pause the main timer if it is active. Otherwise, resume the main timer.
   void _pauseTimer() {
     setState(() {
-      if (_pauseButtonText == "Pause") {
-        _pauseButtonText = "Resume";
+      if (_pauseResumeIcon == Icons.pause) {
+        _pauseResumeIcon = Icons.play_arrow_rounded;
         _mainTimer?.cancel();
       } else {
-        _pauseButtonText = "Pause";
+        _pauseResumeIcon = Icons.pause;
 
         if (_remainingSeconds > 0) {
           _mainTimer = _createMainTimer();
@@ -86,7 +88,7 @@ class _PododoroTimerState extends State<PododoroTimer> {
       _isStartButtonVisible = false;
       _isTimerVisible = true;
       _areTimerButtonsVisible = true;
-      _pauseButtonText = "Pause";
+      _pauseResumeIcon = Icons.pause;
       _remainingSeconds = widget.seconds;
       _remainingMinutes = widget.minutes;
 
@@ -144,14 +146,16 @@ class _PododoroTimerState extends State<PododoroTimer> {
               children: <Widget>[
               Container(
                 margin: const EdgeInsets.all(10),
-                child: ElevatedButton(
+                child: IconButton(
                   onPressed: () => _remainingSeconds > 0 ? _pauseTimer() : null,
-                  child: Text(_pauseButtonText),
-                ),
+                  icon: Icon(_pauseResumeIcon),
+                  style: _iconButtonStyle
+                )
               ),
-              ElevatedButton(
+              IconButton(
                 onPressed: () => _cancelTimer(),
-                child: const Text("Cancel")
+                icon: const Icon(Icons.cancel),
+                style: _iconButtonStyle
               ),
               ],
             )
