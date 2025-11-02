@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pododoro/constants.dart' show Constants;
 import 'package:pododoro/features/countdown.dart';
+import 'package:isar/isar.dart';
+import 'package:pododoro/features/timer.dart';
 
 class PododoroTimer extends StatefulWidget {
   final int minutes;
@@ -15,6 +19,23 @@ class PododoroTimer extends StatefulWidget {
 class _PododoroTimerState extends State<PododoroTimer> {
   bool _isMainTimerRunning = false;
   Color _backgroundColor = Constants.defaultBackgroundColor;
+  late Isar _isar;
+  late Directory _isarDirectory;
+
+  @override
+  void initState() {
+    super.initState();
+
+    initializeIsar();
+  }
+
+  Future initializeIsar() async {
+    _isarDirectory = await getApplicationDocumentsDirectory();
+    _isar = await Isar.open(
+      [TimerSchema],
+      directory: _isarDirectory.path
+    );
+  }
 
   /// Starts the countdown timer and adjusts UI elements
   void _startTimer() {
