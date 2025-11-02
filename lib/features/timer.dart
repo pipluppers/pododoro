@@ -9,4 +9,6 @@ class Timer {
   String? name;
   int? totalMinutes;
   int? totalSeconds;
+
+  Timer({this.name, this.totalMinutes, this.totalSeconds});
 }
