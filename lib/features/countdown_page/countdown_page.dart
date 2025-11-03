@@ -3,84 +3,77 @@ import 'package:flutter/material.dart';
 import 'package:pododoro/constants.dart' show Constants;
 import 'package:pododoro/utilities.dart';
 
-class CountdownWidget extends StatefulWidget {
-  final VoidCallback? onCancel;
+class CountdownPage extends StatefulWidget {
   final int minutes;
   final int seconds;
-  final bool isMainTimerRunning;
 
-  const CountdownWidget({super.key, required this.minutes, required this.seconds, required this.onCancel, required this.isMainTimerRunning});
+  const CountdownPage({super.key, required this.minutes, required this.seconds});
 
   @override
-  State<CountdownWidget> createState() => _CountdownWidgetState();
+  State<CountdownPage> createState() => _CountdownPageState();
 }
 
-class _CountdownWidgetState extends State<CountdownWidget> {
-  Timer? _mainTimer;
+class _CountdownPageState extends State<CountdownPage> {
+  late Timer _mainTimer;
   Timer? _finalTimer;
-  int _remainingMinutes = 0;
-  int _remainingSeconds = 0;
-
+  late int _remainingMinutes;
+  late int _remainingSeconds;
   double _timerOpacity = 1.0;
 
   IconData _pauseResumeIcon = Constants.pauseIcon;
   final ButtonStyle _iconButtonStyle = const ButtonStyle(iconSize: WidgetStatePropertyAll(50));
 
   @override
-  void didUpdateWidget(covariant CountdownWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
+  void initState() {
+    super.initState();
 
-    if (!oldWidget.isMainTimerRunning && widget.isMainTimerRunning) {
-      // Start the timer
-
-      setState(() {
-        _mainTimer?.cancel();
-
-        _pauseResumeIcon = Constants.pauseIcon;
-        _remainingSeconds = widget.seconds;
-        _remainingMinutes = widget.minutes;
-        _timerOpacity = 1.0;
-
-        _mainTimer = _createMainTimer();
-      });
-    } else if (oldWidget.isMainTimerRunning && !widget.isMainTimerRunning) {
-      _cancelAllTimers();
-    }
+    _remainingMinutes = widget.minutes;
+    _remainingSeconds = widget.seconds;
+    _mainTimer = _createMainTimer();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Opacity(
-          opacity: _timerOpacity,
-          child: Text(
-            Utilities.getTimeUnitDisplay(_remainingMinutes, _remainingSeconds),
-            style: const TextStyle(
-              fontSize: 60,
-            )
-          ),
-        ),
-        Row(
+    return Scaffold(
+      body: Container(
+        color: Constants.timerBackgroundColor,
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(
-              margin: const EdgeInsets.all(10),
-              child: IconButton(
-                onPressed: () => _remainingSeconds > 0 ? _pauseTimer() : null,
-                icon: Icon(_pauseResumeIcon),
-                style: _iconButtonStyle
-              )
+            Opacity(
+              opacity: _timerOpacity,
+              child: Text(
+                Utilities.getTimeUnitDisplay(_remainingMinutes, _remainingSeconds),
+                style: const TextStyle(
+                  fontSize: 60,
+                )
+              ),
             ),
-            IconButton(
-              onPressed: widget.onCancel,
-              icon: const Icon(Icons.cancel),
-              style: _iconButtonStyle,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  margin: const EdgeInsets.all(10),
+                  child: IconButton(
+                    onPressed: () => _remainingSeconds > 0 ? _pauseTimer() : null,
+                    icon: Icon(_pauseResumeIcon),
+                    style: _iconButtonStyle
+                  )
+                ),
+                IconButton(
+                  onPressed: () {
+                    _mainTimer.cancel();
+                    _finalTimer?.cancel();
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.cancel),
+                  style: _iconButtonStyle,
+                )
+              ]
             )
           ]
-        )
-      ]
+        ),
+      ),
     );
   }
 
@@ -129,7 +122,7 @@ class _CountdownWidgetState extends State<CountdownWidget> {
     setState(() {
       if (_pauseResumeIcon == Constants.pauseIcon) {
         _pauseResumeIcon = Constants.resumeIcon;
-        _mainTimer?.cancel();
+        _mainTimer.cancel();
       } else {
         _pauseResumeIcon = Constants.pauseIcon;
 
@@ -142,7 +135,7 @@ class _CountdownWidgetState extends State<CountdownWidget> {
 
   /// Resets all internal timers
   void _cancelAllTimers() {
-    _mainTimer?.cancel();
+    _mainTimer.cancel();
     _finalTimer?.cancel();
   }
 }
