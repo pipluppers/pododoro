@@ -99,8 +99,13 @@ class _CountdownWidgetState extends State<CountdownWidget> {
           if (_remainingSeconds > 0) {
               _remainingSeconds--;
           } else {
+            if (_remainingMinutes > 0) {
+              _remainingMinutes--;
+              _remainingSeconds = 59;
+            } else {
               timer.cancel();
               _finalTimer = _createFinalTimer();
+            }
           }
         });
       }
