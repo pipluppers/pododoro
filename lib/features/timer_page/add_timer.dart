@@ -120,7 +120,10 @@ class _AddTimerWidgetState extends State<AddTimerWidget> {
               ],
             ),
             ElevatedButton(
-              onPressed: () => widget.onAdd(_name!, _totalMinutes!, _totalSeconds!),
+              onPressed: () {
+                widget.onAdd(_name!, _totalMinutes!, _totalSeconds!);
+                Navigator.pop(context);
+              },
               child: const Text("Add")
             ),
           ],

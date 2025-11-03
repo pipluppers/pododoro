@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:pododoro/constants.dart';
-import 'package:pododoro/features/add_timer.dart';
 import 'package:pododoro/features/pododoro_timer.dart';
 import 'package:pododoro/features/timer.dart';
 import 'package:pododoro/features/timer_page/timer_page.dart';
@@ -9,11 +8,11 @@ import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const PododoroTimerApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class PododoroTimerApp extends StatelessWidget {
+  const PododoroTimerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(
                     builder: (context) => TimerPage(
                       timers: _timers,
+                      isar: _isar,
                       onSelectTimer: _setActiveTimer,
-                      onDeleteTimer: _removeTimer,
                     )
                   )
                 );
@@ -81,19 +80,6 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       backgroundColor: Constants.defaultBackgroundColor,
       body: _activeTimer != null ? PododoroTimer(timer: _activeTimer!) : Container(color: Colors.black,),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (BuildContext context2) {
-              return AddTimerWidget(onAdd: _addTimer);
-            }
-          );
-        },
-        tooltip: 'Add timer',
-        child: const Icon(Icons.add),
-      ),
     );
   }
 
@@ -110,35 +96,6 @@ class _MyHomePageState extends State<MyHomePage> {
       _timers.addAll(existingTimers);
       if (_timers.isNotEmpty) _activeTimer = _timers[0];
     });
-  }
-
-  /// Adds a timer to the internal database.
-  Future _addTimer(String name, int totalMinutes, int totalSeconds) async{
-    Timer timer = Timer(name: name, totalMinutes: totalMinutes, totalSeconds: totalSeconds);
-    await _isar.writeTxn(() async => await _isar.timers.put(timer));
-
-    setState(() => _timers.add(timer));
-  }
-
-  /// Removes a specified timer from the internal database.
-  Future<bool> _removeTimer(int id) async {
-    Timer? timer = await _isar.timers.get(id);
-
-    if (timer == null) return false;
-
-    bool success = await _isar.writeTxn(() async => _isar.timers.delete(id));
-
-    if (!success) return false;
-
-    setState(() => _timers.remove(timer));
-
-    return success;
-  }
-
-  /// Removes all timers from the internal database.
-  Future _removeAllTimers() async {
-    await _isar.timers.clear();
-    setState(() => _timers.clear());
   }
 
   void _setActiveTimer(String? timerName) {

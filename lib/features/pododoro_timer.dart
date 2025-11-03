@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pododoro/constants.dart' show Constants;
-import 'package:pododoro/features/countdown.dart';
+import 'package:pododoro/features/countdown_page/countdown.dart';
 import 'package:pododoro/features/timer.dart';
 
 class PododoroTimer extends StatefulWidget {
