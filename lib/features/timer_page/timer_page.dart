@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pododoro/constants.dart';
+import 'package:pododoro/utilities.dart';
 import 'package:pododoro/features/timer.dart';
 import 'package:pododoro/features/timer_page/add_timer.dart';
-import 'package:pododoro/utilities.dart';
 import 'package:isar/isar.dart';
 
 class TimerPage extends StatefulWidget {
@@ -19,43 +20,56 @@ class _TimerPageState extends State<TimerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Constants.timerBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: const Text("Timers", style: TextStyle(color: Colors.white),),
         iconTheme: IconThemeData(color: Colors.white),
       ),
-      body: ListView.builder(
-        itemCount: widget.timers.length,
-        itemBuilder: (BuildContext context, int index) {
-          return ListTile(
-            title: Text(widget.timers[index].name!),
-            subtitle: Text(Utilities.getTimeUnitDisplay(widget.timers[index].totalMinutes, widget.timers[index].totalSeconds)),
-            tileColor: Colors.teal,
-            onTap: () {
-              widget.onSelectTimer(widget.timers[index].name);
-              Navigator.pop(context);
-            },
-            onLongPress: () {
-              showModalBottomSheet(
-                context: context,
-                builder: (BuildContext context) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ListTile(
-                        title: const Text("Delete"),
-                        onTap: () {
-                          _removeTimer(widget.timers[index].id);
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ]
-                  );
-                }
-              );
-            },
-          );
-        }
+      body: Container(
+        margin: EdgeInsets.only(top: 10.0),
+        child: ListView.separated(
+          itemCount: widget.timers.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              title: Text(widget.timers[index].name!),
+              subtitle: Text(
+                Utilities.getTimeUnitDisplay(widget.timers[index].totalMinutes, widget.timers[index].totalSeconds)
+              ),
+              onTap: () {
+                widget.onSelectTimer(widget.timers[index].name);
+                Navigator.pop(context);
+              },
+              onLongPress: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          title: const Text("Delete"),
+                          onTap: () {
+                            _removeTimer(widget.timers[index].id);
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ]
+                    );
+                  }
+                );
+              },
+              tileColor: Colors.teal,
+              leading: Icon(Icons.timelapse),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10)
+              ),
+            );
+          },
+          separatorBuilder: (BuildContext context, int index) {
+            return SizedBox(height: 10.0,);
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

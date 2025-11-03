@@ -56,12 +56,13 @@ class _MyHomePageState extends State<MyHomePage> {
         iconTheme: IconThemeData(color: Colors.white),
       ),
       drawer: Drawer(
-        backgroundColor: Colors.blue,
+        backgroundColor: Constants.timerBackgroundColor,
         child: ListView(
+          padding: EdgeInsets.only(top: 30.0),
           children: [
-            DrawerHeader(child: const Text("Timers")),
+            // DrawerHeader(child: const Text("Timers", style: TextStyle(color: Colors.white))),
             ListTile(
-              title: const Text("Timers"),
+              title: const Text("Timers", style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.push(
                   context,
@@ -73,7 +74,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     )
                   )
                 );
-              }
+              },
+              leading: Icon(Icons.timelapse),
             ),
           ],
         ),

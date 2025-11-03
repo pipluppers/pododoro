@@ -34,44 +34,46 @@ class _CountdownPageState extends State<CountdownPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: Constants.timerBackgroundColor,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Opacity(
-              opacity: _timerOpacity,
-              child: Text(
-                Utilities.getTimeUnitDisplay(_remainingMinutes, _remainingSeconds),
-                style: const TextStyle(
-                  fontSize: 60,
-                )
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  child: IconButton(
-                    onPressed: () => _remainingSeconds > 0 ? _pauseTimer() : null,
-                    icon: Icon(_pauseResumeIcon),
-                    style: _iconButtonStyle
+    return SizedBox.expand(
+      child: Scaffold(
+        body: Container(
+          color: Constants.timerBackgroundColor,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Opacity(
+                opacity: _timerOpacity,
+                child: Text(
+                  Utilities.getTimeUnitDisplay(_remainingMinutes, _remainingSeconds),
+                  style: const TextStyle(
+                    fontSize: 60,
                   )
                 ),
-                IconButton(
-                  onPressed: () {
-                    _mainTimer.cancel();
-                    _finalTimer?.cancel();
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Icons.cancel),
-                  style: _iconButtonStyle,
-                )
-              ]
-            )
-          ]
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                    margin: const EdgeInsets.all(10),
+                    child: IconButton(
+                      onPressed: () => _remainingSeconds > 0 ? _pauseTimer() : null,
+                      icon: Icon(_pauseResumeIcon),
+                      style: _iconButtonStyle
+                    )
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      _mainTimer.cancel();
+                      _finalTimer?.cancel();
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Icons.cancel),
+                    style: _iconButtonStyle,
+                  )
+                ]
+              )
+            ]
+          ),
         ),
       ),
     );
