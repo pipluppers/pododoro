@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:pododoro/constants.dart' show Constants;
 import 'package:pododoro/features/countdown.dart';
+import 'package:pododoro/features/timer.dart';
 
 class PododoroTimer extends StatefulWidget {
-  final int minutes;
-  final int seconds;
+  final Timer timer;
 
-  const PododoroTimer({super.key, required this.minutes, required this.seconds});
+  const PododoroTimer({super.key, required this.timer});
   
   @override
   State<PododoroTimer> createState() => _PododoroTimerState();
@@ -58,8 +58,8 @@ class _PododoroTimerState extends State<PododoroTimer> {
               visible: _isMainTimerRunning,
               maintainState: true,
               child: CountdownWidget(
-                minutes: widget.minutes,
-                seconds: widget.seconds,
+                minutes: widget.timer.totalMinutes!,
+                seconds: widget.timer.totalSeconds!,
                 onCancel: _cancelTimer,
                 isMainTimerRunning: _isMainTimerRunning,
               ),
