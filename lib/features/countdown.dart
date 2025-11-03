@@ -1,6 +1,7 @@
 import 'dart:async' show Timer;
 import 'package:flutter/material.dart';
 import 'package:pododoro/constants.dart' show Constants;
+import 'package:pododoro/utilities.dart';
 
 class CountdownWidget extends StatefulWidget {
   final VoidCallback? onCancel;
@@ -55,7 +56,7 @@ class _CountdownWidgetState extends State<CountdownWidget> {
         Opacity(
           opacity: _timerOpacity,
           child: Text(
-            "${_getTimeUnitDisplay(_remainingMinutes)}:${_getTimeUnitDisplay(_remainingSeconds)}",
+            Utilities.getTimeUnitDisplay(_remainingMinutes, _remainingSeconds),
             style: const TextStyle(
               fontSize: 60,
             )
@@ -138,16 +139,5 @@ class _CountdownWidgetState extends State<CountdownWidget> {
   void _cancelAllTimers() {
     _mainTimer?.cancel();
     _finalTimer?.cancel();
-  }
-
-  /// Gets the display string for the time unit.
-  String _getTimeUnitDisplay(int timeUnit) {
-    if (timeUnit >= 10 && timeUnit < 60) {
-      return timeUnit.toString();
-    } else if (timeUnit >= 0 && timeUnit < 10) {
-      return "0$timeUnit";
-    } else {
-      return ""; // Shouldn't happen
-    }
   }
 }
