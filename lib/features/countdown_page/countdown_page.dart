@@ -2,6 +2,7 @@ import 'dart:async' show Timer;
 import 'package:flutter/material.dart';
 import 'package:pododoro/constants.dart' show Constants;
 import 'package:pododoro/utilities.dart';
+import 'package:pododoro/features/alarm_page/alarm_page.dart';
 
 class CountdownPage extends StatefulWidget {
   final int minutes;
@@ -19,6 +20,7 @@ class _CountdownPageState extends State<CountdownPage> {
   late int _remainingMinutes;
   late int _remainingSeconds;
   double _timerOpacity = 1.0;
+  late BuildContext _context;
 
   IconData _pauseResumeIcon = Constants.pauseIcon;
   final ButtonStyle _iconButtonStyle = const ButtonStyle(iconSize: WidgetStatePropertyAll(50));
@@ -34,6 +36,8 @@ class _CountdownPageState extends State<CountdownPage> {
 
   @override
   Widget build(BuildContext context) {
+    _context = context;
+
     return SizedBox.expand(
       child: Scaffold(
         body: Container(
@@ -71,7 +75,7 @@ class _CountdownPageState extends State<CountdownPage> {
                     style: _iconButtonStyle,
                   )
                 ]
-              )
+              ),
             ]
           ),
         ),
@@ -99,7 +103,7 @@ class _CountdownPageState extends State<CountdownPage> {
               _remainingSeconds = 59;
             } else {
               timer.cancel();
-              _finalTimer = _createFinalTimer();
+              Navigator.push(_context, MaterialPageRoute(builder: (context) => AlarmPage()));
             }
           }
         });
