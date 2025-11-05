@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pododoro/features/timer_page/timer_row.dart';
 
 class AddTimerWidget extends StatefulWidget {
   final Function(String, int, int) onAdd;
@@ -26,98 +27,19 @@ class _AddTimerWidgetState extends State<AddTimerWidget> {
         child: Column(
           mainAxisSize: MainAxisSize.min, // prevents the dialog from taking up the whole screen
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: TimerTextWidget(text: "Name"),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      top: 5.0,
-                      right: 5.0,
-                      bottom: 5.0
-                    ),
-                    child: TextField(
-                      onSubmitted: (value) => _name = value,
-                      cursorColor: Colors.white,
-                      autofocus: true,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.white, width: 1.0
-                          )
-                        )
-                      )
-                    ),
-                  ),
-                )
-              ],
+            TimerRow(
+              header: "Name",
+              onTextChanged: (value) => _name = value,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: TimerTextWidget(text: "Total minutes"),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      top: 5.0,
-                      right: 5.0,
-                      bottom: 5.0
-                    ),
-                    child: TextField(
-                      onSubmitted: (value) => _totalMinutes = int.tryParse(value),
-                      keyboardType: TextInputType.number,
-                      autofocus: true,
-                      cursorColor: Colors.white,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.white, width: 1.0
-                          )
-                        )
-                      )
-                    ),
-                  ),
-                )
-              ],
+            TimerRow(
+              header: "Total minutes",
+              textInputType: TextInputType.number,
+              onTextChanged: (value) => _totalMinutes = int.tryParse(value),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: TimerTextWidget(text: "Total seconds"),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      top: 5.0,
-                      right: 5.0,
-                      bottom: 5.0
-                    ),
-                    child: TextField(
-                      onSubmitted: (value) => _totalSeconds = int.tryParse(value),
-                      keyboardType: TextInputType.number,
-                      autofocus: true,
-                      cursorColor: Colors.white,
-                      decoration: InputDecoration(
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.white, width: 1.0
-                          )
-                        )
-                      )
-                    ),
-                  ),
-                )
-              ],
+            TimerRow(
+              header: "Total seconds",
+              textInputType: TextInputType.number,
+              onTextChanged: (value) => _totalSeconds = int.tryParse(value),
             ),
             ElevatedButton(
               onPressed: () {
