@@ -54,16 +54,3 @@ class _AddTimerWidgetState extends State<AddTimerWidget> {
     );
   }
 }
-
-class TimerTextWidget extends StatelessWidget {
-  final String text;
-
-  const TimerTextWidget({super.key, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(text, style: TextStyle(color: Colors.white)),
-    );
-  }
-}

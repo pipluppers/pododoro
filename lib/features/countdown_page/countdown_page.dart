@@ -1,8 +1,13 @@
 import 'dart:async' show Timer;
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pododoro/constants.dart' show Constants;
+import 'package:pododoro/main.dart' show localNotificationsPlugin;
 import 'package:pododoro/utilities.dart';
 import 'package:pododoro/features/alarm_page/alarm_page.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:timezone/data/latest.dart' as tz_latest;
+import 'package:timezone/timezone.dart' as tz;
 
 class CountdownPage extends StatefulWidget {
   final int minutes;
@@ -16,10 +21,8 @@ class CountdownPage extends StatefulWidget {
 
 class _CountdownPageState extends State<CountdownPage> {
   late Timer _mainTimer;
-  Timer? _finalTimer;
   late int _remainingMinutes;
   late int _remainingSeconds;
-  double _timerOpacity = 1.0;
   late BuildContext _context;
 
   IconData _pauseResumeIcon = Constants.pauseIcon;
@@ -32,6 +35,7 @@ class _CountdownPageState extends State<CountdownPage> {
     _remainingMinutes = widget.minutes;
     _remainingSeconds = widget.seconds;
     _mainTimer = _createMainTimer();
+    _sendNotification();
   }
 
   @override
@@ -45,14 +49,11 @@ class _CountdownPageState extends State<CountdownPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Opacity(
-                opacity: _timerOpacity,
-                child: Text(
-                  Utilities.getTimeUnitDisplay(_remainingMinutes, _remainingSeconds),
-                  style: const TextStyle(
-                    fontSize: 60,
-                  )
-                ),
+              Text(
+                Utilities.getTimeUnitDisplay(_remainingMinutes, _remainingSeconds),
+                style: const TextStyle(
+                  fontSize: 60,
+                )
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -68,7 +69,6 @@ class _CountdownPageState extends State<CountdownPage> {
                   IconButton(
                     onPressed: () {
                       _mainTimer.cancel();
-                      _finalTimer?.cancel();
                       Navigator.pop(context);
                     },
                     icon: const Icon(Icons.cancel),
@@ -86,7 +86,52 @@ class _CountdownPageState extends State<CountdownPage> {
   @override
   void dispose() {
     super.dispose();
-    _cancelAllTimers();
+    _mainTimer.cancel();
+  }
+
+  /// Request permission to send notifications. If denied, then do not ask again.
+  Future<bool> _requestNotificationsPermission() async {
+    PermissionStatus status = await Permission.notification.status;
+
+    if (status.isGranted) return true;
+
+    if (status.isDenied) {
+      // Try once to get the permission
+      return await Permission.notification.request().isGranted;
+    }
+
+    return false;
+  }
+
+  /// Send a local notification with information about the remaining time.
+  /// 
+  /// If the app does not have permission, then this will try and request once. If unsuccessful, then the notification will no longer be sent.
+  Future _sendNotification() async {
+    if (!await _requestNotificationsPermission()) return;
+
+    tz_latest.initializeTimeZones();
+    tz.TZDateTime time = tz.TZDateTime.now(tz.local).add(Duration(minutes: _remainingMinutes, seconds: _remainingSeconds));
+
+    localNotificationsPlugin.show(
+      0,
+      "Pododoro timer",
+      "Tap to reopen the timer",
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          "timer_channel",
+          "Timer channel",
+          channelDescription: "Notification channel for timers",
+          importance: Importance.max,
+          priority: Priority.high,
+          when: time.millisecondsSinceEpoch,
+          usesChronometer: true,
+          chronometerCountDown: true,
+          ongoing: true,
+          onlyAlertOnce: true,
+          autoCancel: false,
+        )
+      ),
+    );
   }
 
   /// Creates a timer object based on the remaining seconds.
@@ -111,18 +156,6 @@ class _CountdownPageState extends State<CountdownPage> {
     );
   }
 
-  /// Creates a timer object that will blink 00:00. This should only be called once the main timer is finished.
-  Timer _createFinalTimer() {
-    return Timer.periodic(
-      const Duration(milliseconds: 650),
-      (timer) {
-        setState(() {
-          _timerOpacity = _timerOpacity == 0.0 ? 1.0 : 0.0;
-        });
-      }
-    );
-  }
-
   /// Pause the main timer if it is active. Otherwise, resume the main timer.
   void _pauseTimer() {
     setState(() {
@@ -137,11 +170,5 @@ class _CountdownPageState extends State<CountdownPage> {
         }
       }
     });
-  }
-
-  /// Resets all internal timers
-  void _cancelAllTimers() {
-    _mainTimer.cancel();
-    _finalTimer?.cancel();
   }
 }
