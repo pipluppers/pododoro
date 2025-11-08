@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pododoro/features/timer_page/timer_row.dart';
+import 'package:pododoro/features/home/timer_row.dart';
 
 class AddTimerWidget extends StatefulWidget {
   final Function(String, int, int) onAdd;

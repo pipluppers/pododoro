@@ -4,16 +4,16 @@ import 'package:pododoro/features/countdown_page/countdown_page.dart';
 import 'package:pododoro/features/timer.dart';
 import 'package:pododoro/utilities.dart';
 
-class PododoroTimer extends StatefulWidget {
+class HomePage extends StatefulWidget {
   final Timer? timer;
 
-  const PododoroTimer({super.key, required this.timer});
+  const HomePage({super.key, required this.timer});
   
   @override
-  State<PododoroTimer> createState() => _PododoroTimerState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _PododoroTimerState extends State<PododoroTimer> {
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Container(

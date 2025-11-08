@@ -3,7 +3,7 @@ import 'package:pododoro/constants.dart';
 import 'package:pododoro/utilities.dart';
 import 'package:pododoro/main.dart' show isar;
 import 'package:pododoro/features/timer.dart';
-import 'package:pododoro/features/timer_page/add_timer.dart';
+import 'package:pododoro/features/home/add_timer.dart';
 
 class TimerPage extends StatefulWidget {
   final List<Timer> timers;
