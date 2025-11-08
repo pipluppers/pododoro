@@ -26,9 +26,21 @@ class _AlarmPageState extends State<AlarmPage> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 212, 131, 9),
       body: Center(
-        child: AspectRatio(
-          aspectRatio: _controller.value.aspectRatio,
-          child: VideoPlayer(_controller), 
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AspectRatio(
+              aspectRatio: _controller.value.aspectRatio,
+              child: VideoPlayer(_controller),
+            ),
+            SizedBox(height: 20,),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.popUntil(context, (Route<dynamic> route) { return route.isFirst;});
+              },
+              child: Text("Return"),
+            )
+          ],
         ),
       ),
     );

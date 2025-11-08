@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pododoro/constants.dart' show Constants;
 import 'package:pododoro/features/countdown_page/countdown_page.dart';
 import 'package:pododoro/features/timer.dart';
+import 'package:pododoro/utilities.dart';
 
 class PododoroTimer extends StatefulWidget {
   final Timer? timer;
@@ -21,6 +22,13 @@ class _PododoroTimerState extends State<PododoroTimer> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Text(
+              Utilities.getTimeUnitDisplay(widget.timer?.totalMinutes, widget.timer?.totalSeconds),
+              style: TextStyle(
+                fontSize: 50,
+              ),
+            ),
+            SizedBox(height: 20,),
             ElevatedButton(
               onPressed: () => Navigator.push(
                 context,
