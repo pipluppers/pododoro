@@ -4,7 +4,7 @@ import 'package:pododoro/features/countdown_page/countdown_page.dart';
 import 'package:pododoro/features/timer.dart';
 
 class PododoroTimer extends StatefulWidget {
-  final Timer timer;
+  final Timer? timer;
 
   const PododoroTimer({super.key, required this.timer});
   
@@ -26,8 +26,8 @@ class _PododoroTimerState extends State<PododoroTimer> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => CountdownPage(
-                    minutes: widget.timer.totalMinutes!,
-                    seconds: widget.timer.totalSeconds!,
+                    minutes: widget.timer!.totalMinutes!,
+                    seconds: widget.timer!.totalSeconds!,
                   ),
                 )
               ),

@@ -1,17 +1,16 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pododoro/constants.dart';
 import 'package:pododoro/features/pododoro_timer.dart';
 import 'package:pododoro/features/timer.dart';
-import 'package:pododoro/features/timer_page/timer_page.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pododoro/features/timer_page/timer_page.dart';
 
 /// Used to handle navigating to the correct page when the app is closed and the local notification is tapped
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
 final FlutterLocalNotificationsPlugin localNotificationsPlugin = FlutterLocalNotificationsPlugin();
+late Isar isar;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +29,13 @@ Future<void> main() async {
         navigatorKey.currentState?.popUntil((Route<dynamic> route) { return route.isFirst; });
       }
     }
+  );
+
+  // Initialize database
+  var isarDirectory = await getApplicationDocumentsDirectory();
+  isar = await Isar.open(
+    [TimerSchema],
+    directory: isarDirectory.path
   );
 
   runApp(const PododoroTimerApp());
@@ -60,10 +66,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late Isar _isar;
-  late Directory _isarDirectory;
   Timer? _activeTimer;
   final List<Timer> _timers = <Timer>[];
+    int _currentPageIndex = 0;
+
+  List<Widget> get _pages => [
+    PododoroTimer(timer: _activeTimer),
+    TimerPage(timers: _timers, activeTimerName: _activeTimer?.name, onSelectTimer: _setActiveTimer),
+  ];
 
   @override
   void initState() {
@@ -77,47 +87,41 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text(_activeTimer?.name ?? "", style: TextStyle(color: Colors.white)),
+        title: Center(child: Text(_activeTimer?.name ?? "", style: TextStyle(color: Colors.white))),
         iconTheme: IconThemeData(color: Colors.white),
       ),
-      drawer: Drawer(
-        backgroundColor: Constants.timerBackgroundColor,
-        child: ListView(
-          padding: EdgeInsets.only(top: 30.0),
-          children: [
-            // DrawerHeader(child: const Text("Timers", style: TextStyle(color: Colors.white))),
-            ListTile(
-              title: const Text("Timers", style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TimerPage(
-                      timers: _timers,
-                      isar: _isar,
-                      onSelectTimer: _setActiveTimer,
-                    )
-                  )
-                );
-              },
-              leading: Icon(Icons.timelapse),
-            ),
-          ],
-        ),
-      ),
       backgroundColor: Constants.defaultBackgroundColor,
-      body: _activeTimer != null ? PododoroTimer(timer: _activeTimer!) : Container(color: Colors.black,),
+      body: _pages[_currentPageIndex],
+      bottomNavigationBar: NavigationBar(
+        indicatorColor: const Color.fromARGB(255, 120, 128, 121),
+        destinations: [
+          NavigationDestination(
+            selectedIcon: Icon(Icons.home),
+            icon: Icon(Icons.home_outlined),
+            label: "Home",
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.timelapse),
+            label: "Timers",
+          ),
+        ],
+        selectedIndex: _currentPageIndex,
+        onDestinationSelected: (value) => setState(() => _currentPageIndex = value),
+        backgroundColor: Colors.black,
+      ),
     );
   }
 
   Future initializeUserData() async {
-    _isarDirectory = await getApplicationDocumentsDirectory();
-    _isar = await Isar.open(
-      [TimerSchema],
-      directory: _isarDirectory.path
-    );
+    var existingTimers = await isar.timers.where().findAll();
 
-    var existingTimers = await _isar.timers.where().findAll();
+    if (existingTimers.isEmpty) {
+      // Create the default timer
+      Timer defaultTimer = Timer(name: "Pododoro timer", totalMinutes: 25, totalSeconds: 0);
+      await isar.writeTxn(() async => await isar.timers.put(defaultTimer));
+
+      existingTimers.add(defaultTimer);
+    }
 
     setState(() {
       _timers.addAll(existingTimers);
