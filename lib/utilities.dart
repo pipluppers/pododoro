@@ -1,3 +1,13 @@
+enum TimerState {
+  work,
+  rest
+}
+
+enum AlarmAction {
+  startNextTimer,
+  returnHome
+}
+
 class Utilities {
   /// Gets the display string for the time unit.
   static String getTimeUnitDisplay(int? minutes, int? seconds) {

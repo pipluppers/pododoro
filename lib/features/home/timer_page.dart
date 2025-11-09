@@ -42,7 +42,7 @@ class _TimerPageState extends State<TimerPage> {
             return ListTile(
               title: Text(widget.timers[index].name!),
               subtitle: Text(
-                Utilities.getTimeUnitDisplay(widget.timers[index].totalMinutes, widget.timers[index].totalSeconds)
+                Utilities.getTimeUnitDisplay(widget.timers[index].totalWorkMinutes, widget.timers[index].totalWorkSeconds)
               ),
               onTap: () {
                 setState(() => _selectedIndex = index);
@@ -99,8 +99,8 @@ class _TimerPageState extends State<TimerPage> {
   }
 
   /// Adds a timer to the internal database.
-  Future _addTimer(String name, int totalMinutes, int totalSeconds) async{
-    Timer timer = Timer(name: name, totalMinutes: totalMinutes, totalSeconds: totalSeconds);
+  Future _addTimer(String name, int workMinutes, int workSeconds, int restMinutes, int restSeconds) async{
+    Timer timer = Timer(name: name, totalWorkMinutes: workMinutes, totalWorkSeconds: workSeconds, totalRestMinutes: restMinutes, totalRestSeconds: restSeconds);
     await isar.writeTxn(() async => await isar.timers.put(timer));
 
     setState(() => widget.timers.add(timer));

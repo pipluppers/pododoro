@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:pododoro/constants.dart' show Constants;
 import 'package:pododoro/features/countdown_page/countdown_page.dart';
-import 'package:pododoro/features/timer.dart';
 import 'package:pododoro/utilities.dart';
 
 class HomePage extends StatefulWidget {
-  final Timer? timer;
+  final String currentTimerType;
+  final int minutes;
+  final int seconds;
+  final Function updateState;
 
-  const HomePage({super.key, required this.timer});
+  const HomePage({super.key, required this.currentTimerType, required this.minutes, required this.seconds, required this.updateState});
   
   @override
   State<HomePage> createState() => _HomePageState();
@@ -22,23 +24,28 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              Utilities.getTimeUnitDisplay(widget.timer?.totalMinutes, widget.timer?.totalSeconds),
-              style: TextStyle(
-                fontSize: 50,
-              ),
-            ),
-            SizedBox(height: 20,),
+            TimerInfoWidget(text: widget.currentTimerType, minutes: widget.minutes, seconds: widget.seconds,),
             ElevatedButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CountdownPage(
-                    minutes: widget.timer!.totalMinutes!,
-                    seconds: widget.timer!.totalSeconds!,
-                  ),
-                )
-              ),
+              onPressed: () async {
+                AlarmAction? result;
+
+                do {
+                  result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CountdownPage(
+                        currentTimerType: widget.currentTimerType,
+                        minutes: widget.minutes,
+                        seconds: widget.seconds,
+                      )
+                    )
+                  );
+
+                  if (result != null) {
+                    widget.updateState();
+                  }
+                } while (result == AlarmAction.startNextTimer);
+              },
               style: ElevatedButton.styleFrom(
                 shape: const CircleBorder(),
                 minimumSize: const Size(200, 200),
@@ -49,6 +56,41 @@ class _HomePageState extends State<HomePage> {
           ]
         )
       ),
+    );
+  }
+}
+
+class TimerInfoWidget extends StatelessWidget {
+  const TimerInfoWidget({
+    super.key,
+    required this.text,
+    required this.minutes,
+    required this.seconds,
+  });
+
+  final String text;
+  final int minutes;
+  final int seconds;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 50,
+          )
+        ),
+        Text(
+          Utilities.getTimeUnitDisplay(minutes, seconds),
+          style: TextStyle(
+            fontSize: 50,
+          ),
+        ),
+        SizedBox(height: 20),
+      ]
     );
   }
 }

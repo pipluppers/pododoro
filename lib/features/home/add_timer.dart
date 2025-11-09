@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pododoro/features/home/timer_row.dart';
 
 class AddTimerWidget extends StatefulWidget {
-  final Function(String, int, int) onAdd;
+  final Function(String, int, int, int, int) onAdd;
 
   const AddTimerWidget({super.key, required this.onAdd});
 
@@ -12,8 +12,10 @@ class AddTimerWidget extends StatefulWidget {
 
 class _AddTimerWidgetState extends State<AddTimerWidget> {
   String? _name;
-  int? _totalMinutes;
-  int? _totalSeconds;
+  int? _workMinutes;
+  int? _workSeconds;
+  int? _restMinutes;
+  int? _restSeconds;
 
   @override
   Widget build(BuildContext context) {
@@ -32,18 +34,28 @@ class _AddTimerWidgetState extends State<AddTimerWidget> {
               onTextChanged: (value) => _name = value,
             ),
             TimerRow(
-              header: "Total minutes",
+              header: "Total minutes to work",
               textInputType: TextInputType.number,
-              onTextChanged: (value) => _totalMinutes = int.tryParse(value),
+              onTextChanged: (value) => _workMinutes = int.tryParse(value),
             ),
             TimerRow(
-              header: "Total seconds",
+              header: "Total seconds to work",
               textInputType: TextInputType.number,
-              onTextChanged: (value) => _totalSeconds = int.tryParse(value),
+              onTextChanged: (value) => _workSeconds = int.tryParse(value),
+            ),
+            TimerRow(
+              header: "Total minutes to rest",
+              textInputType: TextInputType.number,
+              onTextChanged: (value) => _restMinutes = int.tryParse(value),
+            ),
+            TimerRow(
+              header: "Total seconds to rest",
+              textInputType: TextInputType.number,
+              onTextChanged: (value) => _restSeconds = int.tryParse(value),
             ),
             ElevatedButton(
               onPressed: () {
-                widget.onAdd(_name!, _totalMinutes!, _totalSeconds!);
+                widget.onAdd(_name!, _workMinutes!, _workSeconds!, _restMinutes!, _restSeconds!);
                 Navigator.pop(context);
               },
               child: const Text("Add")

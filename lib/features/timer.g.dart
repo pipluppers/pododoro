@@ -17,19 +17,34 @@ const TimerSchema = CollectionSchema(
   name: r'Timer',
   id: 3422435319111787164,
   properties: {
-    r'name': PropertySchema(
+    r'hashCode': PropertySchema(
       id: 0,
+      name: r'hashCode',
+      type: IsarType.long,
+    ),
+    r'name': PropertySchema(
+      id: 1,
       name: r'name',
       type: IsarType.string,
     ),
-    r'totalMinutes': PropertySchema(
-      id: 1,
-      name: r'totalMinutes',
+    r'totalRestMinutes': PropertySchema(
+      id: 2,
+      name: r'totalRestMinutes',
       type: IsarType.long,
     ),
-    r'totalSeconds': PropertySchema(
-      id: 2,
-      name: r'totalSeconds',
+    r'totalRestSeconds': PropertySchema(
+      id: 3,
+      name: r'totalRestSeconds',
+      type: IsarType.long,
+    ),
+    r'totalWorkMinutes': PropertySchema(
+      id: 4,
+      name: r'totalWorkMinutes',
+      type: IsarType.long,
+    ),
+    r'totalWorkSeconds': PropertySchema(
+      id: 5,
+      name: r'totalWorkSeconds',
       type: IsarType.long,
     )
   },
@@ -68,9 +83,12 @@ void _timerSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.name);
-  writer.writeLong(offsets[1], object.totalMinutes);
-  writer.writeLong(offsets[2], object.totalSeconds);
+  writer.writeLong(offsets[0], object.hashCode);
+  writer.writeString(offsets[1], object.name);
+  writer.writeLong(offsets[2], object.totalRestMinutes);
+  writer.writeLong(offsets[3], object.totalRestSeconds);
+  writer.writeLong(offsets[4], object.totalWorkMinutes);
+  writer.writeLong(offsets[5], object.totalWorkSeconds);
 }
 
 Timer _timerDeserialize(
@@ -79,11 +97,14 @@ Timer _timerDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = Timer();
+  final object = Timer(
+    name: reader.readStringOrNull(offsets[1]),
+    totalRestMinutes: reader.readLongOrNull(offsets[2]) ?? 5,
+    totalRestSeconds: reader.readLongOrNull(offsets[3]) ?? 0,
+    totalWorkMinutes: reader.readLongOrNull(offsets[4]) ?? 25,
+    totalWorkSeconds: reader.readLongOrNull(offsets[5]) ?? 0,
+  );
   object.id = id;
-  object.name = reader.readStringOrNull(offsets[0]);
-  object.totalMinutes = reader.readLongOrNull(offsets[1]);
-  object.totalSeconds = reader.readLongOrNull(offsets[2]);
   return object;
 }
 
@@ -95,11 +116,17 @@ P _timerDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 1:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? 5) as P;
+    case 3:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 4:
+      return (reader.readLongOrNull(offset) ?? 25) as P;
+    case 5:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -193,6 +220,58 @@ extension TimerQueryWhere on QueryBuilder<Timer, Timer, QWhereClause> {
 }
 
 extension TimerQueryFilter on QueryBuilder<Timer, Timer, QFilterCondition> {
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> hashCodeEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> hashCodeGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> hashCodeLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> hashCodeBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'hashCode',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Timer, Timer, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -389,67 +468,51 @@ extension TimerQueryFilter on QueryBuilder<Timer, Timer, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalMinutesIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'totalMinutes',
-      ));
-    });
-  }
-
-  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalMinutesIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'totalMinutes',
-      ));
-    });
-  }
-
-  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalMinutesEqualTo(
-      int? value) {
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalRestMinutesEqualTo(
+      int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'totalMinutes',
+        property: r'totalRestMinutes',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalMinutesGreaterThan(
-    int? value, {
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalRestMinutesGreaterThan(
+    int value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'totalMinutes',
+        property: r'totalRestMinutes',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalMinutesLessThan(
-    int? value, {
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalRestMinutesLessThan(
+    int value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'totalMinutes',
+        property: r'totalRestMinutes',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalMinutesBetween(
-    int? lower,
-    int? upper, {
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalRestMinutesBetween(
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'totalMinutes',
+        property: r'totalRestMinutes',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -458,67 +521,157 @@ extension TimerQueryFilter on QueryBuilder<Timer, Timer, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalSecondsIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'totalSeconds',
-      ));
-    });
-  }
-
-  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalSecondsIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'totalSeconds',
-      ));
-    });
-  }
-
-  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalSecondsEqualTo(
-      int? value) {
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalRestSecondsEqualTo(
+      int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'totalSeconds',
+        property: r'totalRestSeconds',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalSecondsGreaterThan(
-    int? value, {
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalRestSecondsGreaterThan(
+    int value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'totalSeconds',
+        property: r'totalRestSeconds',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalSecondsLessThan(
-    int? value, {
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalRestSecondsLessThan(
+    int value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'totalSeconds',
+        property: r'totalRestSeconds',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalSecondsBetween(
-    int? lower,
-    int? upper, {
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalRestSecondsBetween(
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'totalSeconds',
+        property: r'totalRestSeconds',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalWorkMinutesEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'totalWorkMinutes',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalWorkMinutesGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'totalWorkMinutes',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalWorkMinutesLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'totalWorkMinutes',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalWorkMinutesBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'totalWorkMinutes',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalWorkSecondsEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'totalWorkSeconds',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalWorkSecondsGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'totalWorkSeconds',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalWorkSecondsLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'totalWorkSeconds',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterFilterCondition> totalWorkSecondsBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'totalWorkSeconds',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -533,6 +686,18 @@ extension TimerQueryObject on QueryBuilder<Timer, Timer, QFilterCondition> {}
 extension TimerQueryLinks on QueryBuilder<Timer, Timer, QFilterCondition> {}
 
 extension TimerQuerySortBy on QueryBuilder<Timer, Timer, QSortBy> {
+  QueryBuilder<Timer, Timer, QAfterSortBy> sortByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterSortBy> sortByHashCodeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.desc);
+    });
+  }
+
   QueryBuilder<Timer, Timer, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -545,32 +710,68 @@ extension TimerQuerySortBy on QueryBuilder<Timer, Timer, QSortBy> {
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterSortBy> sortByTotalMinutes() {
+  QueryBuilder<Timer, Timer, QAfterSortBy> sortByTotalRestMinutes() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalMinutes', Sort.asc);
+      return query.addSortBy(r'totalRestMinutes', Sort.asc);
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterSortBy> sortByTotalMinutesDesc() {
+  QueryBuilder<Timer, Timer, QAfterSortBy> sortByTotalRestMinutesDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalMinutes', Sort.desc);
+      return query.addSortBy(r'totalRestMinutes', Sort.desc);
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterSortBy> sortByTotalSeconds() {
+  QueryBuilder<Timer, Timer, QAfterSortBy> sortByTotalRestSeconds() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalSeconds', Sort.asc);
+      return query.addSortBy(r'totalRestSeconds', Sort.asc);
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterSortBy> sortByTotalSecondsDesc() {
+  QueryBuilder<Timer, Timer, QAfterSortBy> sortByTotalRestSecondsDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalSeconds', Sort.desc);
+      return query.addSortBy(r'totalRestSeconds', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterSortBy> sortByTotalWorkMinutes() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWorkMinutes', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterSortBy> sortByTotalWorkMinutesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWorkMinutes', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterSortBy> sortByTotalWorkSeconds() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWorkSeconds', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterSortBy> sortByTotalWorkSecondsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWorkSeconds', Sort.desc);
     });
   }
 }
 
 extension TimerQuerySortThenBy on QueryBuilder<Timer, Timer, QSortThenBy> {
+  QueryBuilder<Timer, Timer, QAfterSortBy> thenByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterSortBy> thenByHashCodeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.desc);
+    });
+  }
+
   QueryBuilder<Timer, Timer, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -595,32 +796,62 @@ extension TimerQuerySortThenBy on QueryBuilder<Timer, Timer, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterSortBy> thenByTotalMinutes() {
+  QueryBuilder<Timer, Timer, QAfterSortBy> thenByTotalRestMinutes() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalMinutes', Sort.asc);
+      return query.addSortBy(r'totalRestMinutes', Sort.asc);
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterSortBy> thenByTotalMinutesDesc() {
+  QueryBuilder<Timer, Timer, QAfterSortBy> thenByTotalRestMinutesDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalMinutes', Sort.desc);
+      return query.addSortBy(r'totalRestMinutes', Sort.desc);
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterSortBy> thenByTotalSeconds() {
+  QueryBuilder<Timer, Timer, QAfterSortBy> thenByTotalRestSeconds() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalSeconds', Sort.asc);
+      return query.addSortBy(r'totalRestSeconds', Sort.asc);
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterSortBy> thenByTotalSecondsDesc() {
+  QueryBuilder<Timer, Timer, QAfterSortBy> thenByTotalRestSecondsDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalSeconds', Sort.desc);
+      return query.addSortBy(r'totalRestSeconds', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterSortBy> thenByTotalWorkMinutes() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWorkMinutes', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterSortBy> thenByTotalWorkMinutesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWorkMinutes', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterSortBy> thenByTotalWorkSeconds() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWorkSeconds', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterSortBy> thenByTotalWorkSecondsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWorkSeconds', Sort.desc);
     });
   }
 }
 
 extension TimerQueryWhereDistinct on QueryBuilder<Timer, Timer, QDistinct> {
+  QueryBuilder<Timer, Timer, QDistinct> distinctByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hashCode');
+    });
+  }
+
   QueryBuilder<Timer, Timer, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -628,15 +859,27 @@ extension TimerQueryWhereDistinct on QueryBuilder<Timer, Timer, QDistinct> {
     });
   }
 
-  QueryBuilder<Timer, Timer, QDistinct> distinctByTotalMinutes() {
+  QueryBuilder<Timer, Timer, QDistinct> distinctByTotalRestMinutes() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'totalMinutes');
+      return query.addDistinctBy(r'totalRestMinutes');
     });
   }
 
-  QueryBuilder<Timer, Timer, QDistinct> distinctByTotalSeconds() {
+  QueryBuilder<Timer, Timer, QDistinct> distinctByTotalRestSeconds() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'totalSeconds');
+      return query.addDistinctBy(r'totalRestSeconds');
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QDistinct> distinctByTotalWorkMinutes() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'totalWorkMinutes');
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QDistinct> distinctByTotalWorkSeconds() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'totalWorkSeconds');
     });
   }
 }
@@ -648,21 +891,39 @@ extension TimerQueryProperty on QueryBuilder<Timer, Timer, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Timer, int, QQueryOperations> hashCodeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'hashCode');
+    });
+  }
+
   QueryBuilder<Timer, String?, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
     });
   }
 
-  QueryBuilder<Timer, int?, QQueryOperations> totalMinutesProperty() {
+  QueryBuilder<Timer, int, QQueryOperations> totalRestMinutesProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'totalMinutes');
+      return query.addPropertyName(r'totalRestMinutes');
     });
   }
 
-  QueryBuilder<Timer, int?, QQueryOperations> totalSecondsProperty() {
+  QueryBuilder<Timer, int, QQueryOperations> totalRestSecondsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'totalSeconds');
+      return query.addPropertyName(r'totalRestSeconds');
+    });
+  }
+
+  QueryBuilder<Timer, int, QQueryOperations> totalWorkMinutesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'totalWorkMinutes');
+    });
+  }
+
+  QueryBuilder<Timer, int, QQueryOperations> totalWorkSecondsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'totalWorkSeconds');
     });
   }
 }

@@ -3,17 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pododoro/constants.dart' show Constants;
 import 'package:pododoro/main.dart' show localNotificationsPlugin;
-import 'package:pododoro/utilities.dart';
 import 'package:pododoro/features/alarm_page/alarm_page.dart';
+import 'package:pododoro/features/home/home_page.dart' show TimerInfoWidget;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/data/latest.dart' as tz_latest;
 import 'package:timezone/timezone.dart' as tz;
 
 class CountdownPage extends StatefulWidget {
+  final String currentTimerType;
   final int minutes;
   final int seconds;
 
-  const CountdownPage({super.key, required this.minutes, required this.seconds});
+  const CountdownPage({super.key, required this.currentTimerType, required this.minutes, required this.seconds});
 
   @override
   State<CountdownPage> createState() => _CountdownPageState();
@@ -49,12 +50,7 @@ class _CountdownPageState extends State<CountdownPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(
-                Utilities.getTimeUnitDisplay(_remainingMinutes, _remainingSeconds),
-                style: const TextStyle(
-                  fontSize: 60,
-                )
-              ),
+              TimerInfoWidget(text: widget.currentTimerType, minutes: _remainingMinutes, seconds: _remainingSeconds),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -138,7 +134,7 @@ class _CountdownPageState extends State<CountdownPage> {
   Timer _createMainTimer() {
     return Timer.periodic(
       const Duration(seconds: 1), // Fires every second
-      (timer) {
+      (timer) async {
         setState(() {
           if (_remainingSeconds > 0) {
               _remainingSeconds--;
@@ -148,10 +144,17 @@ class _CountdownPageState extends State<CountdownPage> {
               _remainingSeconds = 59;
             } else {
               timer.cancel();
-              Navigator.push(_context, MaterialPageRoute(builder: (context) => AlarmPage()));
             }
           }
         });
+
+        if (!timer.isActive) {
+          var result = await Navigator.push(_context, MaterialPageRoute(builder: (context) => AlarmPage()));
+
+          if (_context.mounted) {
+            Navigator.pop(_context, result);
+          }
+        }
       }
     );
   }

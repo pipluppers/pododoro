@@ -7,15 +7,18 @@ class Timer {
   Id id = Isar.autoIncrement;
 
   String? name;
-  int? totalMinutes;
-  int? totalSeconds;
+  int totalWorkMinutes;
+  int totalWorkSeconds;
+  int totalRestMinutes;
+  int totalRestSeconds;
 
-  Timer({this.name, this.totalMinutes, this.totalSeconds});
+  Timer({this.name, this.totalWorkMinutes = 25, this.totalWorkSeconds = 0, this.totalRestMinutes = 5, this.totalRestSeconds = 0});
 
   @override
   bool operator ==(Object other) {
     if (other is Timer) {
-      return name == other.name && totalMinutes == other.totalMinutes && totalSeconds == other.totalSeconds;
+      return name == other.name && totalWorkMinutes == other.totalWorkMinutes && totalWorkSeconds == other.totalWorkSeconds &&
+        totalRestMinutes == other.totalRestMinutes && totalRestSeconds == other.totalRestSeconds;
     }
     else {
       return false;
@@ -34,17 +37,17 @@ class Timer {
       hashCode += 34;
     }
 
-    if (totalMinutes != null) {
-      hashCode += (totalMinutes! * 17);
-    } else {
-      hashCode += 17;
-    }
+    hashCode = hashCode + (totalWorkMinutes * 17) + (totalWorkSeconds * 17) + (totalRestMinutes * 17) + (totalRestSeconds * 17);
+    // if (totalWorkMinutes != null) {
+    // } else {
+    //   hashCode += 17;
+    // }
 
-    if (totalSeconds != null) {
-      hashCode += (totalSeconds! * 17);
-    } else {
-      hashCode += 17;
-    }
+    // if (totalSeconds != null) {
+    //   hashCode += (totalSeconds! * 17);
+    // } else {
+    //   hashCode += 17;
+    // }
 
     return hashCode;
   }

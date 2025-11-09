@@ -5,6 +5,7 @@ import 'package:pododoro/features/timer.dart';
 import 'package:pododoro/constants.dart';
 import 'package:pododoro/main.dart';
 import 'package:isar/isar.dart';
+import 'package:pododoro/utilities.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -18,7 +19,8 @@ class _MainPageState extends State<MainPage> {
   late Timer _activeTimer;
   final List<Timer> _timers = <Timer>[];
   int _currentPageIndex = 0;
-  late List<Widget> _pages;
+  final List<Widget> _pages = <Widget>[];
+  TimerState _timerState = TimerState.work;
 
   @override
   void initState() {
@@ -47,7 +49,7 @@ class _MainPageState extends State<MainPage> {
 
     if (existingTimers.isEmpty) {
       // Create the default timer
-      Timer defaultTimer = Timer(name: "Pododoro timer", totalMinutes: 25, totalSeconds: 0);
+      Timer defaultTimer = Timer(name: "Pododoro timer", totalWorkMinutes: 25, totalWorkSeconds: 0);
       await isar.writeTxn(() async => await isar.timers.put(defaultTimer));
 
       existingTimers.add(defaultTimer);
@@ -72,10 +74,24 @@ class _MainPageState extends State<MainPage> {
   ///
   /// Updates the _pages member with the home page and the timer page.
   Scaffold _generatePage() {
-    _pages = [
-      HomePage(timer: _activeTimer),
-      TimerPage(timers: _timers, activeTimerName: _activeTimer.name, onSelectTimer: _setActiveTimer),
-    ];
+    final int totalMinutes, totalSeconds;
+
+    if (_timerState == TimerState.work) {
+      totalMinutes = _activeTimer.totalWorkMinutes;
+      totalSeconds = _activeTimer.totalWorkSeconds;
+    } else {
+      totalMinutes = _activeTimer.totalRestMinutes;
+      totalSeconds = _activeTimer.totalRestSeconds;
+    }
+
+    final String currentTimerType = _timerState == TimerState.work ? "Work" : "Rest";
+
+    if (_pages.isNotEmpty) {
+      _pages.clear();
+    }
+
+    _pages.add(HomePage(currentTimerType: currentTimerType, minutes: totalMinutes, seconds: totalSeconds, updateState: _updateState,));
+    _pages.add(TimerPage(timers: _timers, activeTimerName: _activeTimer.name, onSelectTimer: _setActiveTimer));
 
     return Scaffold(
       appBar: AppBar(
@@ -103,6 +119,16 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: Colors.black,
       ),
     );
+  }
+
+  void _updateState() {
+    setState(() {
+      if (_timerState == TimerState.work) {
+        _timerState = TimerState.rest;
+      } else {
+        _timerState = TimerState.work;
+      }
+    });
   }
 
 }
