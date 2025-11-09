@@ -49,7 +49,7 @@ class _MainPageState extends State<MainPage> {
 
     if (existingTimers.isEmpty) {
       // Create the default timer
-      Timer defaultTimer = Timer(name: "Pododoro timer", totalWorkMinutes: 25, totalWorkSeconds: 0);
+      Timer defaultTimer = Timer(name: "Pododoro timer", totalWorkMinutes: 25, totalWorkSeconds: 0, totalRestMinutes: 5, totalRestSeconds: 0);
       await isar.writeTxn(() async => await isar.timers.put(defaultTimer));
 
       existingTimers.add(defaultTimer);
@@ -96,7 +96,7 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Center(child: Text(_activeTimer.name ?? "", style: TextStyle(color: Colors.white))),
+        title: Center(child: Text(_activeTimer.name, style: TextStyle(color: Colors.white))),
         iconTheme: IconThemeData(color: Colors.white),
       ),
       backgroundColor: Constants.defaultBackgroundColor,
@@ -121,6 +121,7 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
+  /// Updates whether to use the work timer or the rest timer.
   void _updateState() {
     setState(() {
       if (_timerState == TimerState.work) {

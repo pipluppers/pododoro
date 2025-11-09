@@ -53,7 +53,21 @@ const TimerSchema = CollectionSchema(
   deserialize: _timerDeserialize,
   deserializeProp: _timerDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'name': IndexSchema(
+      id: 879695947855722453,
+      name: r'name',
+      unique: true,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'name',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {},
   getId: _timerGetId,
@@ -68,12 +82,7 @@ int _timerEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  {
-    final value = object.name;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
+  bytesCount += 3 + object.name.length * 3;
   return bytesCount;
 }
 
@@ -98,7 +107,7 @@ Timer _timerDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Timer(
-    name: reader.readStringOrNull(offsets[1]),
+    name: reader.readString(offsets[1]),
     totalRestMinutes: reader.readLongOrNull(offsets[2]) ?? 5,
     totalRestSeconds: reader.readLongOrNull(offsets[3]) ?? 0,
     totalWorkMinutes: reader.readLongOrNull(offsets[4]) ?? 25,
@@ -118,7 +127,7 @@ P _timerDeserializeProp<P>(
     case 0:
       return (reader.readLong(offset)) as P;
     case 1:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 2:
       return (reader.readLongOrNull(offset) ?? 5) as P;
     case 3:
@@ -142,6 +151,60 @@ List<IsarLinkBase<dynamic>> _timerGetLinks(Timer object) {
 
 void _timerAttach(IsarCollection<dynamic> col, Id id, Timer object) {
   object.id = id;
+}
+
+extension TimerByIndex on IsarCollection<Timer> {
+  Future<Timer?> getByName(String name) {
+    return getByIndex(r'name', [name]);
+  }
+
+  Timer? getByNameSync(String name) {
+    return getByIndexSync(r'name', [name]);
+  }
+
+  Future<bool> deleteByName(String name) {
+    return deleteByIndex(r'name', [name]);
+  }
+
+  bool deleteByNameSync(String name) {
+    return deleteByIndexSync(r'name', [name]);
+  }
+
+  Future<List<Timer?>> getAllByName(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return getAllByIndex(r'name', values);
+  }
+
+  List<Timer?> getAllByNameSync(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'name', values);
+  }
+
+  Future<int> deleteAllByName(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'name', values);
+  }
+
+  int deleteAllByNameSync(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'name', values);
+  }
+
+  Future<Id> putByName(Timer object) {
+    return putByIndex(r'name', object);
+  }
+
+  Id putByNameSync(Timer object, {bool saveLinks = true}) {
+    return putByIndexSync(r'name', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByName(List<Timer> objects) {
+    return putAllByIndex(r'name', objects);
+  }
+
+  List<Id> putAllByNameSync(List<Timer> objects, {bool saveLinks = true}) {
+    return putAllByIndexSync(r'name', objects, saveLinks: saveLinks);
+  }
 }
 
 extension TimerQueryWhereSort on QueryBuilder<Timer, Timer, QWhere> {
@@ -215,6 +278,49 @@ extension TimerQueryWhere on QueryBuilder<Timer, Timer, QWhereClause> {
         upper: upperId,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterWhereClause> nameEqualTo(String name) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'name',
+        value: [name],
+      ));
+    });
+  }
+
+  QueryBuilder<Timer, Timer, QAfterWhereClause> nameNotEqualTo(String name) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [],
+              upper: [name],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [name],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [name],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [],
+              upper: [name],
+              includeUpper: false,
+            ));
+      }
     });
   }
 }
@@ -324,24 +430,8 @@ extension TimerQueryFilter on QueryBuilder<Timer, Timer, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Timer, Timer, QAfterFilterCondition> nameIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'name',
-      ));
-    });
-  }
-
-  QueryBuilder<Timer, Timer, QAfterFilterCondition> nameIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'name',
-      ));
-    });
-  }
-
   QueryBuilder<Timer, Timer, QAfterFilterCondition> nameEqualTo(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -354,7 +444,7 @@ extension TimerQueryFilter on QueryBuilder<Timer, Timer, QFilterCondition> {
   }
 
   QueryBuilder<Timer, Timer, QAfterFilterCondition> nameGreaterThan(
-    String? value, {
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -369,7 +459,7 @@ extension TimerQueryFilter on QueryBuilder<Timer, Timer, QFilterCondition> {
   }
 
   QueryBuilder<Timer, Timer, QAfterFilterCondition> nameLessThan(
-    String? value, {
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -384,8 +474,8 @@ extension TimerQueryFilter on QueryBuilder<Timer, Timer, QFilterCondition> {
   }
 
   QueryBuilder<Timer, Timer, QAfterFilterCondition> nameBetween(
-    String? lower,
-    String? upper, {
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -897,7 +987,7 @@ extension TimerQueryProperty on QueryBuilder<Timer, Timer, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Timer, String?, QQueryOperations> nameProperty() {
+  QueryBuilder<Timer, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
     });
