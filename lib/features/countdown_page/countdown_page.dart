@@ -35,7 +35,7 @@ class _CountdownPageState extends State<CountdownPage> {
     _remainingMinutes = widget.minutes;
     _remainingSeconds = widget.seconds;
     _mainTimer = _createMainTimer();
-    _sendNotification();
+    _sendNotification(true);
   }
 
   @override
@@ -99,11 +99,18 @@ class _CountdownPageState extends State<CountdownPage> {
   /// Send a local notification with information about the remaining time.
   /// 
   /// If the app does not have permission, then this will try and request once. If unsuccessful, then the notification will no longer be sent.
-  Future _sendNotification() async {
+  Future _sendNotification(bool usesChronometer) async {
     if (!await _requestNotificationsPermission()) return;
 
-    tz_latest.initializeTimeZones();
-    tz.TZDateTime time = tz.TZDateTime.now(tz.local).add(Duration(minutes: _remainingMinutes, seconds: _remainingSeconds));
+    int? when;
+    bool chronometerCountDown = false;
+
+    if (usesChronometer) {
+      tz_latest.initializeTimeZones();
+      tz.TZDateTime time = tz.TZDateTime.now(tz.local).add(Duration(minutes: _remainingMinutes, seconds: _remainingSeconds));
+      when = time.millisecondsSinceEpoch;
+      chronometerCountDown = true;
+    }
 
     localNotificationsPlugin.show(
       0,
@@ -116,12 +123,14 @@ class _CountdownPageState extends State<CountdownPage> {
           channelDescription: "Notification channel for timers",
           importance: Importance.max,
           priority: Priority.high,
-          when: time.millisecondsSinceEpoch,
-          usesChronometer: true,
-          chronometerCountDown: true,
+          when: when,
+          usesChronometer: usesChronometer,
+          chronometerCountDown: chronometerCountDown,
           ongoing: true,
           onlyAlertOnce: true,
           autoCancel: false,
+          enableVibration: false,
+          silent: true,
         )
       ),
     );
@@ -175,5 +184,12 @@ class _CountdownPageState extends State<CountdownPage> {
         }
       }
     });
+
+    if (_pauseResumeIcon == Constants.pauseIcon) {
+      _sendNotification(true);
+    } else {
+      _sendNotification(false);
+    }
   }
+
 }
