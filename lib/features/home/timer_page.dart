@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:isar/isar.dart';
 import 'package:pododoro/constants.dart';
 import 'package:pododoro/utilities.dart';
 import 'package:pododoro/main.dart' show isar;

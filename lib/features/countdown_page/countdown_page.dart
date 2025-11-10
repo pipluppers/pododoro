@@ -24,7 +24,6 @@ class _CountdownPageState extends State<CountdownPage> {
   late Timer _mainTimer;
   late int _remainingMinutes;
   late int _remainingSeconds;
-  late BuildContext _context;
 
   IconData _pauseResumeIcon = Constants.pauseIcon;
   final ButtonStyle _iconButtonStyle = const ButtonStyle(iconSize: WidgetStatePropertyAll(50));
@@ -41,8 +40,6 @@ class _CountdownPageState extends State<CountdownPage> {
 
   @override
   Widget build(BuildContext context) {
-    _context = context;
-
     return SizedBox.expand(
       child: Scaffold(
         body: Container(
@@ -149,10 +146,15 @@ class _CountdownPageState extends State<CountdownPage> {
         });
 
         if (!timer.isActive) {
-          var result = await Navigator.push(_context, MaterialPageRoute(builder: (context) => AlarmPage()));
+          final navigator = Navigator.of(context);
 
-          if (_context.mounted) {
-            Navigator.pop(_context, result);
+          var result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AlarmPage()),
+          );
+
+          if (context.mounted) {
+            navigator.pop(result);
           }
         }
       }
