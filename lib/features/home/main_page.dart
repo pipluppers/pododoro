@@ -63,11 +63,14 @@ class _MainPageState extends State<MainPage> {
     return _timers[0];
   }
 
-  /// Set the active timer.
+  /// Set the active timer and rest the state to use the work timer.
   void _setActiveTimer(String? timerName) {
     if (timerName == null) return;
 
-    setState(() => _activeTimer = _timers.firstWhere((timer) => timer.name == timerName));
+    setState(() {
+      _activeTimer = _timers.firstWhere((timer) => timer.name == timerName);
+      _timerState = TimerState.work;
+    });
   }
 
   /// Constructs the main page.
