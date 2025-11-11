@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pododoro/constants.dart';
+import 'package:pododoro/data_management/database_service.dart' show DatabaseService;
 import 'package:pododoro/utilities.dart';
-import 'package:pododoro/main.dart' show isar;
 import 'package:pododoro/features/timer.dart';
 import 'package:pododoro/features/home/add_timer.dart';
+import 'package:get_it/get_it.dart' show GetIt;
 
 class TimerPage extends StatefulWidget {
   final List<Timer> timers;
@@ -104,18 +105,20 @@ class _TimerPageState extends State<TimerPage> {
   Future _addTimer(String name, int workMinutes, int workSeconds, int restMinutes, int restSeconds) async{
     Timer timer = Timer(name: name, totalWorkMinutes: workMinutes, totalWorkSeconds: workSeconds, totalRestMinutes: restMinutes, totalRestSeconds: restSeconds);
 
-    await isar.writeTxn(() async => await isar.timers.put(timer));
+    await GetIt.I<DatabaseService>().addTimer(timer);
 
     setState(() => widget.timers.add(timer));
   }
 
   /// Removes a specified timer from the internal database.
   Future<bool> _removeTimer(int id) async {
-    Timer? timer = await isar.timers.get(id);
+    DatabaseService databaseService = GetIt.I<DatabaseService>();
+
+    Timer? timer = await databaseService.getTimer(id);
 
     if (timer == null) return false;
 
-    bool success = await isar.writeTxn(() async => isar.timers.delete(id));
+    bool success = await databaseService.removeTimer(id);
 
     if (!success) return false;
 
@@ -123,10 +126,4 @@ class _TimerPageState extends State<TimerPage> {
 
     return success;
   }
-
-  // /// Removes all timers from the internal database.
-  // Future _removeAllTimers() async {
-  //   await isar.timers.clear();
-  //   setState(() => widget.timers.clear());
-  // }
 }

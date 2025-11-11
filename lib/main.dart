@@ -1,40 +1,55 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:pododoro/data_management/database_service.dart';
 import 'package:pododoro/features/home/main_page.dart';
-import 'package:pododoro/features/timer.dart';
+import 'package:pododoro/utilities.dart';
+import 'package:get_it/get_it.dart' show GetIt;
 import 'package:isar/isar.dart';
-import 'package:path_provider/path_provider.dart';
 
 /// Used to handle navigating to the correct page when the app is closed and the local notification is tapped
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final FlutterLocalNotificationsPlugin localNotificationsPlugin = FlutterLocalNotificationsPlugin();
 late Isar isar;
+late AppPlatform appPlatform;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher'); // Uses your app icon
-
-  const InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid
-  );
-
-  await localNotificationsPlugin.initialize(
-    initializationSettings,
-    onDidReceiveNotificationResponse: (NotificationResponse response) {
-      if (response.payload == "Reopen app") {
-        navigatorKey.currentState?.popUntil((Route<dynamic> route) { return route.isFirst; });
-      }
+  if (kIsWeb) {
+    appPlatform = AppPlatform.web;
+    // TODO Use another db. Isar is not supported in Dart 3.x +
+  } else {
+    if (Platform.isAndroid) {
+      appPlatform = AppPlatform.android;
+    } else if (Platform.isIOS) {
+      appPlatform = AppPlatform.ios;
+    } else {
+      throw UnsupportedError('Pododoro timer does not support this platform.');
     }
-  );
 
-  // Initialize database
-  var isarDirectory = await getApplicationDocumentsDirectory();
-  isar = await Isar.open(
-    [TimerSchema],
-    directory: isarDirectory.path
-  );
+    const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher'); // Uses your app icon
+
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid
+    );
+
+    IsarService isarService = IsarService();
+    isarService.initializeDatabase();
+
+    GetIt.I.registerSingleton<DatabaseService>(isarService);
+
+    await localNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        if (response.payload == "Reopen app") {
+          navigatorKey.currentState?.popUntil((Route<dynamic> route) { return route.isFirst; });
+        }
+      }
+    );
+  }
 
   runApp(const PododoroTimerApp());
 }

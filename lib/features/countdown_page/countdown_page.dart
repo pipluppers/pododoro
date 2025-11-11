@@ -2,10 +2,11 @@ import 'dart:async' show Timer;
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pododoro/constants.dart' show Constants;
-import 'package:pododoro/main.dart' show localNotificationsPlugin;
+import 'package:pododoro/main.dart' show localNotificationsPlugin, appPlatform;
 import 'package:pododoro/features/alarm_page/alarm_page.dart';
 import 'package:pododoro/features/home/home_page.dart' show TimerInfoWidget;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pododoro/utilities.dart';
 import 'package:timezone/data/latest.dart' as tz_latest;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -97,9 +98,13 @@ class _CountdownPageState extends State<CountdownPage> {
   }
 
   /// Send a local notification with information about the remaining time.
-  /// 
+  ///
+  /// This will no-op if the platform is not android nor iOS.
+  ///
   /// If the app does not have permission, then this will try and request once. If unsuccessful, then the notification will no longer be sent.
   Future _sendNotification(bool usesChronometer) async {
+    if (appPlatform != AppPlatform.android && appPlatform != AppPlatform.ios) return;
+
     if (!await _requestNotificationsPermission()) return;
 
     int? when;

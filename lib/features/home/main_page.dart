@@ -3,9 +3,9 @@ import 'package:pododoro/features/home/home_page.dart';
 import 'package:pododoro/features/home/timer_page.dart';
 import 'package:pododoro/features/timer.dart';
 import 'package:pododoro/constants.dart';
-import 'package:pododoro/main.dart';
-import 'package:isar/isar.dart';
+import 'package:get_it/get_it.dart' show GetIt;
 import 'package:pododoro/utilities.dart';
+import 'package:pododoro/data_management/database_service.dart' show DatabaseService;
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -45,12 +45,14 @@ class _MainPageState extends State<MainPage> {
 
   /// Get all existing timers from internal database. If there are no existing timers, then add the default one to the database.
   Future<Timer> initializeTimers() async {
-    var existingTimers = await isar.timers.where().findAll();
+    DatabaseService databaseService = GetIt.I<DatabaseService>();
+
+    var existingTimers = await databaseService.getAllTimers();
 
     if (existingTimers.isEmpty) {
       // Create the default timer
       Timer defaultTimer = Timer(name: "Pododoro timer", totalWorkMinutes: 25, totalWorkSeconds: 0, totalRestMinutes: 5, totalRestSeconds: 0);
-      await isar.writeTxn(() async => await isar.timers.put(defaultTimer));
+      await databaseService.addTimer(defaultTimer);
 
       existingTimers.add(defaultTimer);
     }

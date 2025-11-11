@@ -1,3 +1,9 @@
+enum AppPlatform {
+  android,
+  ios,
+  web
+}
+
 enum TimerState {
   work,
   rest
