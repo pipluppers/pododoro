@@ -19,12 +19,12 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Constants.defaultBackgroundColor,
+      color: Constants.mainPageBackgroundColor,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            TimerInfoWidget(text: widget.currentTimerType, minutes: widget.minutes, seconds: widget.seconds,),
             ElevatedButton(
               onPressed: () async {
                 AlarmAction? result;
@@ -49,9 +49,9 @@ class _HomePageState extends State<HomePage> {
               style: ElevatedButton.styleFrom(
                 shape: const CircleBorder(),
                 minimumSize: const Size(200, 200),
-                backgroundColor: const Color.fromARGB(255, 238, 24, 9),
+                backgroundColor: Constants.mainPageComplementColor,
               ),
-              child: const Text("Start"),
+              child: TimerInfoWidget(text: widget.currentTimerType, minutes: widget.minutes, seconds: widget.seconds,),
             ),
           ]
         )
@@ -78,18 +78,13 @@ class TimerInfoWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          text,
+          "$text\n${Utilities.getTimeUnitDisplay(minutes, seconds)}",
           style: TextStyle(
+            color: Constants.mainPageComplementTextColor,
+            fontWeight: FontWeight.normal,
             fontSize: 50,
           )
         ),
-        Text(
-          Utilities.getTimeUnitDisplay(minutes, seconds),
-          style: TextStyle(
-            fontSize: 50,
-          ),
-        ),
-        SizedBox(height: 20),
       ]
     );
   }

@@ -27,7 +27,7 @@ class _TimerPageState extends State<TimerPage> {
     }
 
     return Scaffold(
-      backgroundColor: Constants.timerBackgroundColor,
+      backgroundColor: Constants.mainPageBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: const Text("Timers", style: TextStyle(color: Colors.white),),
@@ -41,9 +41,13 @@ class _TimerPageState extends State<TimerPage> {
             final bool isSelected = index == _selectedIndex;
 
             return ListTile(
-              title: Text(widget.timers[index].name),
+              title: Text(
+                widget.timers[index].name,
+                style: const TextStyle(color: Constants.mainPageComplementTextColor,),
+              ),
               subtitle: Text(
-                Utilities.getTimeUnitDisplay(widget.timers[index].totalWorkMinutes, widget.timers[index].totalWorkSeconds)
+                Utilities.getTimeUnitDisplay(widget.timers[index].totalWorkMinutes, widget.timers[index].totalWorkSeconds),
+                style: const TextStyle(color: Constants.mainPageComplementTextColor,),
               ),
               onTap: () {
                 setState(() => _selectedIndex = index);
@@ -51,7 +55,7 @@ class _TimerPageState extends State<TimerPage> {
               },
               selected: isSelected,
               selectedColor: Colors.orange,
-              selectedTileColor: Colors.red,
+              selectedTileColor: Constants.selectedTimerTileColor,
               onLongPress: () {
                 showModalBottomSheet(
                   context: context,
@@ -71,7 +75,7 @@ class _TimerPageState extends State<TimerPage> {
                   }
                 );
               },
-              tileColor: Colors.teal,
+              tileColor: Constants.mainPageComplementColor,
               leading: Icon(Icons.timelapse),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10)

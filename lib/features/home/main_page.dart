@@ -104,7 +104,7 @@ class _MainPageState extends State<MainPage> {
         title: Center(child: Text(_activeTimer.name, style: TextStyle(color: Colors.white))),
         iconTheme: IconThemeData(color: Colors.white),
       ),
-      backgroundColor: Constants.defaultBackgroundColor,
+      backgroundColor: Constants.mainPageBackgroundColor,
       body: _pages[_currentPageIndex],
       bottomNavigationBar: NavigationBar(
         indicatorColor: const Color.fromARGB(255, 120, 128, 121),
