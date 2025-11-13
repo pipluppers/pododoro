@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pododoro/features/home/timer_row.dart';
+import 'package:pododoro/constants.dart';
 import 'package:isar/isar.dart' show IsarError;
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -42,27 +42,24 @@ class _AddTimerWidgetState extends State<AddTimerWidget> {
           children: [
             TimerRow(
               header: "Name",
-              onTextChanged: (value) => _name = value,
+              child: TextField(
+                onChanged: (value) => _name = value,
+                keyboardType: TextInputType.text,
+              )
             ),
             TimerRow(
-              header: "Total minutes to work",
-              textInputType: TextInputType.number,
-              onTextChanged: (value) => _workMinutes = int.tryParse(value),
+              header: "How long to work?",
+              child: NewTimer(
+                onMinutesChanged: (value) => _workMinutes = int.tryParse(value),
+                onSecondsChanged: (value) => _workSeconds = int.tryParse(value),
+              ),
             ),
             TimerRow(
-              header: "Total seconds to work",
-              textInputType: TextInputType.number,
-              onTextChanged: (value) => _workSeconds = int.tryParse(value),
-            ),
-            TimerRow(
-              header: "Total minutes to rest",
-              textInputType: TextInputType.number,
-              onTextChanged: (value) => _restMinutes = int.tryParse(value),
-            ),
-            TimerRow(
-              header: "Total seconds to rest",
-              textInputType: TextInputType.number,
-              onTextChanged: (value) => _restSeconds = int.tryParse(value),
+              header: "How long to rest?",
+              child: NewTimer(
+                onMinutesChanged: (value) => _restMinutes = int.tryParse(value),
+                onSecondsChanged: (value) => _restSeconds = int.tryParse(value),
+              ),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -128,6 +125,133 @@ class _AddTimerWidgetState extends State<AddTimerWidget> {
     }
 
     return (success, errorMessages.join('\n'));
+  }
+}
+
+class TimerRow extends StatelessWidget {
+  final String header;
+  final Widget child;
+
+  const TimerRow({super.key, required this.header, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Center(
+            child: Text(
+              header,
+              style: const TextStyle(
+                color: Constants.mainPageComplementTextColor,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: child,
+        )
+      ],
+    );
+  }
+}
+
+class NewTimer extends StatefulWidget {
+  final Function(String) onMinutesChanged;
+  final Function(String) onSecondsChanged;
+
+  const NewTimer({
+    super.key,
+    required this.onMinutesChanged,
+    required this.onSecondsChanged,
+  });
+
+  @override
+  State<NewTimer> createState() => _NewTimerState();
+}
+
+class _NewTimerState extends State<NewTimer> {
+  late FocusNode _minutesFocusNode;
+  late FocusNode _secondsFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _minutesFocusNode = FocusNode();
+    _secondsFocusNode = FocusNode();
+
+    // Immediately request focus on the minutes box when this widget is loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) => _minutesFocusNode.requestFocus());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+    children: [
+      InputTimeBox(focusNode: _minutesFocusNode, onTextChanged: _onMinutesChanged,),
+      Container(
+        margin: EdgeInsets.symmetric(horizontal: 8.0),
+        child: const Text(
+          ":",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 56,
+          ),
+        ),
+      ),
+      InputTimeBox(focusNode: _secondsFocusNode, onTextChanged: _onSecondsChanged,),
+    ],
+  );
+  }
+
+  void _onMinutesChanged(String minutesText) {
+    widget.onMinutesChanged(minutesText);
+
+    if (minutesText.length == 2) {
+      _secondsFocusNode.requestFocus();
+    }
+  }
+
+  void _onSecondsChanged(String secondsText) {
+    widget.onSecondsChanged(secondsText);
+  }
+}
+
+class InputTimeBox extends StatelessWidget {
+  final FocusNode focusNode;
+  final Function(String)? onTextChanged;
+
+  const InputTimeBox({
+    super.key,
+    required this.focusNode,
+    this.onTextChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 100,
+      child: TextField(
+        autofocus: true,
+        focusNode: focusNode,
+        keyboardType: TextInputType.number,
+        onChanged: onTextChanged,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(vertical: 18.0),
+        ),
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 56,
+        ),
+        textAlign: TextAlign.center,
+        maxLength: 2,
+      ),
+    );
   }
 }
 

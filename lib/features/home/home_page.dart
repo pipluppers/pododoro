@@ -83,7 +83,8 @@ class TimerInfoWidget extends StatelessWidget {
             color: Constants.mainPageComplementTextColor,
             fontWeight: FontWeight.normal,
             fontSize: 50,
-          )
+          ),
+          textAlign: TextAlign.center,
         ),
       ]
     );
