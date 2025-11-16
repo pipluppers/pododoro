@@ -11,4 +11,10 @@ class Constants {
   static const IconData pauseIcon = Icons.pause;
   static const IconData resumeIcon = Icons.play_arrow_rounded;
   static const IconData cancelIcon = Icons.cancel;
+
+  static const String defaultTimerName = 'Pododoro timer';
+  static const int defaultTimerWorkMinutes = 25;
+  static const int defaultTimerWorkSeconds = 0;
+  static const int defaultTimerRestMinutes = 5;
+  static const int defaultTimerRestSeconds = 0;
 }

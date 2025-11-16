@@ -1,53 +1,17 @@
-import 'package:isar/isar.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:pododoro/features/timer.dart';
-
 abstract interface class DatabaseService {
-  Future initializeDatabase();
-  Future<Timer?> getTimer(int id);
-  Future<List<Timer>> getAllTimers();
-  Future addTimer(Timer timer);
+  Future<void> initializeDatabase();
+  Future<ITimer?> getTimer(int id);
+  Future<List<ITimer>> getAllTimers();
+  Future<int> addTimer(String name, int totalWorkMinutes, int totalWorkSeconds, int totalRestMinutes, int totalRestSeconds);
   Future<bool> removeTimer(int id);
+  ITimer constructTimer(int id, String name, int totalWorkMinutes, int totalWorkSeconds, int totalRestMinutes, int totalRestSeconds);
 }
 
-/// Service object using the isar database.
-/// 
-/// This class only supports Android and iOS platforms.
-class IsarService implements DatabaseService {
-  late Isar _isar;
-
-  /// Initialize the isar database.
-  @override
-  Future initializeDatabase() async {
-    final isarDirectory = (await getApplicationDocumentsDirectory()).path;
-
-    _isar = await Isar.open(
-      [TimerSchema],
-      directory: isarDirectory,
-    );
-  }
-
-  /// Gets a timer with the specified id from the database.
-  @override
-  Future<Timer?> getTimer(int id) {
-    return _isar.timers.get(id);
-  }
-
-  /// Gets all timers stored in the database.
-  @override
-  Future<List<Timer>> getAllTimers() async {
-    return _isar.timers.where().findAll();
-  }
-
-  /// Store a timer to the database.
-  @override
-  Future addTimer(Timer timer) async {
-    await _isar.writeTxn(() async => await _isar.timers.put(timer));
-  }
-
-  /// Remove a timer from the database.
-  @override
-  Future<bool> removeTimer(int id) async {
-    return await _isar.writeTxn(() async => await _isar.timers.delete(id));
-  }
+abstract interface class ITimer {
+  int get id;
+  String get name;
+  int get totalWorkMinutes;
+  int get totalWorkSeconds;
+  int get totalRestMinutes;
+  int get totalRestSeconds;
 }

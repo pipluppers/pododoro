@@ -33,3 +33,6 @@ class Utilities {
     }
   }
 }
+
+// Exceptions
+class AddTimerException implements Exception { }

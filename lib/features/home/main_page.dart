@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pododoro/features/home/home_page.dart';
 import 'package:pododoro/features/home/timer_page.dart';
-import 'package:pododoro/features/timer.dart';
 import 'package:pododoro/constants.dart';
 import 'package:get_it/get_it.dart' show GetIt;
-import 'package:pododoro/utilities.dart';
-import 'package:pododoro/data_management/database_service.dart' show DatabaseService;
+import 'package:pododoro/utilities.dart' show TimerState;
+import 'package:pododoro/data_management/database_service.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -15,9 +14,9 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  late Future<Timer> _activeTimerFuture;
-  late Timer _activeTimer;
-  final List<Timer> _timers = <Timer>[];
+  late Future<ITimer> _activeTimerFuture;
+  late ITimer _activeTimer;
+  final List<ITimer> _timers = <ITimer>[];
   int _currentPageIndex = 0;
   final List<Widget> _pages = <Widget>[];
   TimerState _timerState = TimerState.work;
@@ -26,7 +25,7 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
 
-    _activeTimerFuture = initializeTimers();
+    _activeTimerFuture = _initializeTimers();
   }
 
   @override
@@ -44,18 +43,10 @@ class _MainPageState extends State<MainPage> {
   }
 
   /// Get all existing timers from internal database. If there are no existing timers, then add the default one to the database.
-  Future<Timer> initializeTimers() async {
+  Future<ITimer> _initializeTimers() async {
     DatabaseService databaseService = GetIt.I<DatabaseService>();
 
     var existingTimers = await databaseService.getAllTimers();
-
-    if (existingTimers.isEmpty) {
-      // Create the default timer
-      Timer defaultTimer = Timer(name: "Pododoro timer", totalWorkMinutes: 25, totalWorkSeconds: 0, totalRestMinutes: 5, totalRestSeconds: 0);
-      await databaseService.addTimer(defaultTimer);
-
-      existingTimers.add(defaultTimer);
-    }
 
     setState(() {
       _timers.addAll(existingTimers);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pododoro/constants.dart';
-import 'package:isar/isar.dart' show IsarError;
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pododoro/utilities.dart' show AddTimerException;
 
 class AddTimerWidget extends StatefulWidget {
   final Function(String, int, int, int, int) onAdd;
@@ -45,6 +45,9 @@ class _AddTimerWidgetState extends State<AddTimerWidget> {
               child: TextField(
                 onChanged: (value) => _name = value,
                 keyboardType: TextInputType.text,
+                style: TextStyle(
+                  color: Constants.mainPageComplementTextColor
+                ),
               )
             ),
             TimerRow(
@@ -76,12 +79,10 @@ class _AddTimerWidgetState extends State<AddTimerWidget> {
                   }
 
                   await widget.onAdd(_name!, _workMinutes!, _workSeconds!, _restMinutes!, _restSeconds!);
-                } on IsarError catch (ex) {
+                } on AddTimerException {
                   if (context.mounted) {
-                    String exceptionMessage = ex.message == "Unique index violated" ? "A timer with the name ${_name!} already exists." : ex.message;
-
                     flutterToast.showToast(
-                      child: AddTimerToast(exceptionMessage: exceptionMessage),
+                      child: AddTimerToast(exceptionMessage: "A timer with the name ${_name!} already exists."),
                       toastDuration: Duration(seconds: 2),
                       gravity: ToastGravity.BOTTOM
                     );

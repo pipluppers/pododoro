@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:pododoro/constants.dart';
-import 'package:pododoro/data_management/database_service.dart' show DatabaseService;
-import 'package:pododoro/utilities.dart';
-import 'package:pododoro/features/timer.dart';
+import 'package:pododoro/data_management/database_service.dart';
+import 'package:pododoro/utilities.dart' show Utilities;
 import 'package:pododoro/features/home/add_timer.dart';
 import 'package:get_it/get_it.dart' show GetIt;
 
 class TimerPage extends StatefulWidget {
-  final List<Timer> timers;
+  final List<ITimer> timers;
   final Function(String?) onSelectTimer;
   final String? activeTimerName;
 
@@ -104,21 +103,19 @@ class _TimerPageState extends State<TimerPage> {
   }
 
   /// Adds a timer to the internal database.
-  ///
-  /// IsarError will be thrown if the name is a duplicate.
   Future _addTimer(String name, int workMinutes, int workSeconds, int restMinutes, int restSeconds) async{
-    Timer timer = Timer(name: name, totalWorkMinutes: workMinutes, totalWorkSeconds: workSeconds, totalRestMinutes: restMinutes, totalRestSeconds: restSeconds);
+    final DatabaseService databaseService = GetIt.I<DatabaseService>();
 
-    await GetIt.I<DatabaseService>().addTimer(timer);
+    int newTimerId = await databaseService.addTimer(name, workMinutes, workSeconds, restMinutes, restSeconds);
 
-    setState(() => widget.timers.add(timer));
+    setState(() => widget.timers.add(databaseService.constructTimer(newTimerId, name, workMinutes, workSeconds, restMinutes, restSeconds)));
   }
 
   /// Removes a specified timer from the internal database.
   Future<bool> _removeTimer(int id) async {
     DatabaseService databaseService = GetIt.I<DatabaseService>();
 
-    Timer? timer = await databaseService.getTimer(id);
+    ITimer? timer = await databaseService.getTimer(id);
 
     if (timer == null) return false;
 

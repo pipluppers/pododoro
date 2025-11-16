@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pododoro/constants.dart' show Constants;
 import 'package:pododoro/features/countdown_page/countdown_page.dart';
-import 'package:pododoro/utilities.dart';
+import 'package:pododoro/utilities.dart' show AlarmAction, Utilities;
 
 class HomePage extends StatefulWidget {
   final String currentTimerType;

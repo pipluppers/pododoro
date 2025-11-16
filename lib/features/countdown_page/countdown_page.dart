@@ -6,7 +6,7 @@ import 'package:pododoro/main.dart' show localNotificationsPlugin, appPlatform;
 import 'package:pododoro/features/alarm_page/alarm_page.dart';
 import 'package:pododoro/features/home/home_page.dart' show TimerInfoWidget;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:pododoro/utilities.dart';
+import 'package:pododoro/utilities.dart' show AppPlatform;
 import 'package:timezone/data/latest.dart' as tz_latest;
 import 'package:timezone/timezone.dart' as tz;
 

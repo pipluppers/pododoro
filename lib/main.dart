@@ -3,15 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pododoro/data_management/database_service.dart';
+import 'package:pododoro/data_management/drift/drift_database_service.dart';
 import 'package:pododoro/features/home/main_page.dart';
 import 'package:pododoro/utilities.dart';
 import 'package:get_it/get_it.dart' show GetIt;
-import 'package:isar/isar.dart';
 
 /// Used to handle navigating to the correct page when the app is closed and the local notification is tapped
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final FlutterLocalNotificationsPlugin localNotificationsPlugin = FlutterLocalNotificationsPlugin();
-late Isar isar;
 late AppPlatform appPlatform;
 
 Future<void> main() async {
@@ -19,7 +18,6 @@ Future<void> main() async {
 
   if (kIsWeb) {
     appPlatform = AppPlatform.web;
-    // TODO Use another db. Isar is not supported in Dart 3.x +
   } else {
     if (Platform.isAndroid) {
       appPlatform = AppPlatform.android;
@@ -36,10 +34,10 @@ Future<void> main() async {
       android: initializationSettingsAndroid
     );
 
-    IsarService isarService = IsarService();
-    isarService.initializeDatabase();
+    DriftDatabaseService driftDatabaseService = DriftDatabaseService();
+    driftDatabaseService.initializeDatabase();
 
-    GetIt.I.registerSingleton<DatabaseService>(isarService);
+    GetIt.I.registerSingleton<DatabaseService>(driftDatabaseService);
 
     await localNotificationsPlugin.initialize(
       initializationSettings,
