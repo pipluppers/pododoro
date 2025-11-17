@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:pododoro/features/countdown_page/countdown_page.dart';
 import 'package:pododoro/features/home/home_page.dart';
 import 'package:pododoro/features/home/timer_page.dart';
 import 'package:pododoro/constants.dart';
 import 'package:get_it/get_it.dart' show GetIt;
-import 'package:pododoro/utilities.dart' show TimerState;
+import 'package:pododoro/utilities.dart' show AlarmAction, TimerState;
 import 'package:pododoro/data_management/database_service.dart';
 
 class MainPage extends StatefulWidget {
@@ -56,16 +57,6 @@ class _MainPageState extends State<MainPage> {
     return _timers[0];
   }
 
-  /// Set the active timer and rest the state to use the work timer.
-  void _setActiveTimer(String? timerName) {
-    if (timerName == null) return;
-
-    setState(() {
-      _activeTimer = _timers.firstWhere((timer) => timer.name == timerName);
-      _timerState = TimerState.work;
-    });
-  }
-
   /// Constructs the main page.
   ///
   /// Updates the _pages member with the home page and the timer page.
@@ -86,7 +77,7 @@ class _MainPageState extends State<MainPage> {
       _pages.clear();
     }
 
-    _pages.add(HomePage(currentTimerType: currentTimerType, minutes: totalMinutes, seconds: totalSeconds, updateState: _updateState,));
+    _pages.add(HomePage(currentTimerType: currentTimerType, minutes: totalMinutes, seconds: totalSeconds, startCountdown: _startCountdown,));
     _pages.add(TimerPage(timers: _timers, activeTimerName: _activeTimer.name, onSelectTimer: _setActiveTimer));
 
     return Scaffold(
@@ -117,14 +108,55 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  /// Updates whether to use the work timer or the rest timer.
-  void _updateState() {
-    setState(() {
+  Future<void> _startCountdown() async {
+    AlarmAction? result;
+    late String timerType;
+    late int totalMinutes;
+    late int totalSeconds;
+
+    do {
       if (_timerState == TimerState.work) {
-        _timerState = TimerState.rest;
+        timerType = "Work";
+        totalMinutes = _activeTimer.totalWorkMinutes;
+        totalSeconds = _activeTimer.totalWorkSeconds;
       } else {
-        _timerState = TimerState.work;
+        timerType = "Rest";
+        totalMinutes = _activeTimer.totalRestMinutes;
+        totalSeconds = _activeTimer.totalRestSeconds;
       }
+
+      result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CountdownPage(
+            currentTimerType: timerType,
+            minutes: totalMinutes,
+            seconds: totalSeconds,
+          )
+        )
+      );
+
+      if (result == null) {
+        // The user either pressed the back button or did something else to leave the alarm page screen.
+        // Require the user to manually click to start the timer again.
+        return;
+      }
+
+      setState(() {
+        if (_timerState == TimerState.work) {
+          _timerState = TimerState.rest;
+        } else {
+          _timerState = TimerState.work;
+        }
+      });
+    } while (result == AlarmAction.startNextTimer);
+  }
+
+  /// Set the active timer and rest the state to use the work timer.
+  void _setActiveTimer(String timerName) {
+    setState(() {
+      _activeTimer = _timers.firstWhere((timer) => timer.name == timerName);
+      _timerState = TimerState.work;
     });
   }
 

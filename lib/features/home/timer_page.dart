@@ -7,7 +7,7 @@ import 'package:get_it/get_it.dart' show GetIt;
 
 class TimerPage extends StatefulWidget {
   final List<ITimer> timers;
-  final Function(String?) onSelectTimer;
+  final Function(String) onSelectTimer;
   final String? activeTimerName;
 
   const TimerPage({super.key, required this.timers, required this.activeTimerName, required this.onSelectTimer});
