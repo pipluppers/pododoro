@@ -16,6 +16,11 @@ late AppPlatform appPlatform;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize database
+  DriftDatabaseService driftDatabaseService = DriftDatabaseService();
+  await driftDatabaseService.initializeDatabase();
+  GetIt.I.registerSingleton<DatabaseService>(driftDatabaseService);
+
   if (kIsWeb) {
     appPlatform = AppPlatform.web;
   } else {
@@ -33,11 +38,6 @@ Future<void> main() async {
     const InitializationSettings initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid
     );
-
-    DriftDatabaseService driftDatabaseService = DriftDatabaseService();
-    driftDatabaseService.initializeDatabase();
-
-    GetIt.I.registerSingleton<DatabaseService>(driftDatabaseService);
 
     await localNotificationsPlugin.initialize(
       initializationSettings,
