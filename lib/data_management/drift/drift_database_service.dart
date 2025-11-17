@@ -1,12 +1,14 @@
 import 'package:pododoro/constants.dart';
-import 'package:pododoro/utilities.dart' show AddTimerException;
+import 'package:pododoro/utilities.dart' show AddTimerException, RemoveTimerException;
 import 'package:pododoro/data_management/database_service.dart';
 import 'package:pododoro/data_management/drift/drift_database.dart';
+import 'package:pododoro/resources/string_resources.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/remote.dart' show DriftRemoteException;
 
 class DriftDatabaseService implements DatabaseService {
   late TimerDriftDatabase _database;
+  late int _defaultTimerId;
 
   DriftDatabaseService();
 
@@ -14,16 +16,24 @@ class DriftDatabaseService implements DatabaseService {
   Future<void> initializeDatabase() async {
     _database = TimerDriftDatabase();
 
-    // Adds the default timer if there aren't any timers.
     int? count = await _getCount();
+
     if (count == 0) {
-      await addTimer(
+      // Adds the default timer if there aren't any timers.
+
+      _defaultTimerId = await addTimer(
         Constants.defaultTimerName,
         Constants.defaultTimerWorkMinutes,
         Constants.defaultTimerWorkSeconds,
         Constants.defaultTimerRestMinutes,
         Constants.defaultTimerRestSeconds
       );
+    } else {
+      _defaultTimerId = (
+        await (
+          _database.select(_database.timerTable)..where((t) => t.name.equals(Constants.defaultTimerName))
+        ).getSingle()
+      ).id;
     }
   }
 
@@ -80,9 +90,15 @@ class DriftDatabaseService implements DatabaseService {
   /// Deletes the timer with the specified id.
   @override
   Future<bool> removeTimer(int id) async {
-    int numDeletedRows = await (_database.delete(_database.timerTable)..where((t) => t.id.equals(id))).go();
+    if (id == _defaultTimerId) throw RemoveTimerException(StringResources.removeDefaultTimerErrorMessage);
 
-    return numDeletedRows > 0;
+    try {
+      int numDeletedRows = await (_database.delete(_database.timerTable)..where((t) => t.id.equals(id))).go();
+
+      return numDeletedRows > 0;
+    } catch (ex) {
+      throw RemoveTimerException('$ex');
+    }
   }
 
   @override
@@ -116,15 +132,6 @@ class DriftTimer implements ITimer {
 
   DriftTimer(this._id, this._name, this._totalWorkMinutes, this._totalWorkSeconds, this._totalRestMinutes, this._totalRestSeconds);
 
-  static DriftTimer defaultTimer() => DriftTimer(
-    0, // The id of the default timer will always be 0
-    Constants.defaultTimerName,
-    Constants.defaultTimerWorkMinutes,
-    Constants.defaultTimerWorkSeconds,
-    Constants.defaultTimerRestMinutes,
-    Constants.defaultTimerRestSeconds    
-  );
-
   @override
   int get id => _id;
 
@@ -143,4 +150,6 @@ class DriftTimer implements ITimer {
   @override
   int get totalRestSeconds => _totalRestSeconds;
 
+  @override
+  bool get isDefaultTimer => _name == Constants.defaultTimerName;
 }

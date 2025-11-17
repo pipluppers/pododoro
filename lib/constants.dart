@@ -5,6 +5,7 @@ class Constants {
   static const Color mainPageComplementColor = Color(0xAF5D4037);
   static const Color mainPageComplementTextColor = Colors.white;
   static const Color selectedTimerTileColor = Colors.red;
+  static const Color removeTimerSwipeColor = Colors.red;
 
   static const Color timerBackgroundColor = Colors.black;
 

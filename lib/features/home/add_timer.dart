@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pododoro/constants.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:pododoro/utilities.dart' show AddTimerException;
+import 'package:pododoro/utilities.dart' show AddTimerException, Utilities;
 
 class AddTimerWidget extends StatefulWidget {
   final Function(String, int, int, int, int) onAdd;
@@ -69,23 +69,14 @@ class _AddTimerWidgetState extends State<AddTimerWidget> {
                 try {
                   var (success, errorMessage) = canAdd();
                   if (!success) {
-                    flutterToast.showToast(
-                      child: AddTimerToast(exceptionMessage: errorMessage),
-                      toastDuration: Duration(seconds: 2),
-                      gravity: ToastGravity.BOTTOM
-                    );
-
+                    Utilities.showToast(flutterToast, errorMessage);
                     return;
                   }
 
                   await widget.onAdd(_name!, _workMinutes!, _workSeconds!, _restMinutes!, _restSeconds!);
                 } on AddTimerException {
                   if (context.mounted) {
-                    flutterToast.showToast(
-                      child: AddTimerToast(exceptionMessage: "A timer with the name ${_name!} already exists."),
-                      toastDuration: Duration(seconds: 2),
-                      gravity: ToastGravity.BOTTOM
-                    );
+                    Utilities.showToast(flutterToast, "A timer with the name ${_name!} already exists.");
                   }
 
                   return;
@@ -252,27 +243,6 @@ class InputTimeBox extends StatelessWidget {
         textAlign: TextAlign.center,
         maxLength: 2,
       ),
-    );
-  }
-}
-
-class AddTimerToast extends StatelessWidget {
-  const AddTimerToast({
-    super.key,
-    required this.exceptionMessage,
-  });
-
-  final String exceptionMessage;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0, bottom: 10.0),
-      decoration: BoxDecoration(
-        color: Colors.grey,
-        borderRadius: BorderRadiusGeometry.all(Radius.elliptical(45, 45)),
-      ),
-      child: Text(exceptionMessage),
     );
   }
 }

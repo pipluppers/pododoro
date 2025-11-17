@@ -14,4 +14,5 @@ abstract interface class ITimer {
   int get totalWorkSeconds;
   int get totalRestMinutes;
   int get totalRestSeconds;
+  bool get isDefaultTimer;
 }

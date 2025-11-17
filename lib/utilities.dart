@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
 enum AppPlatform {
   android,
   ios,
@@ -32,7 +35,41 @@ class Utilities {
       return ""; // Shouldn't happen
     }
   }
+
+  /// Shows a toast message for 2 seconds.
+  static void showToast(FToast flutterToast, String message) {
+    flutterToast.showToast(
+      child: AddTimerToast(exceptionMessage: message),
+      toastDuration: Duration(seconds: 2),
+      gravity: ToastGravity.BOTTOM
+    );
+  }
+}
+
+class AddTimerToast extends StatelessWidget {
+  const AddTimerToast({
+    super.key,
+    required this.exceptionMessage,
+  });
+
+  final String exceptionMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0, bottom: 10.0),
+      decoration: BoxDecoration(
+        color: Colors.grey,
+        borderRadius: BorderRadiusGeometry.all(Radius.elliptical(45, 45)),
+      ),
+      child: Text(exceptionMessage),
+    );
+  }
 }
 
 // Exceptions
 class AddTimerException implements Exception { }
+class RemoveTimerException implements Exception {
+  final String message;
+  RemoveTimerException(this.message);
+}
