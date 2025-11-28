@@ -67,6 +67,21 @@ class AddTimerToast extends StatelessWidget {
   }
 }
 
+class TimeCounter {
+  int _minutes;
+  int _seconds;
+
+  TimeCounter(this._minutes, this._seconds);
+
+  int get minutes => _minutes;
+  int get seconds => _seconds;
+
+  void updateTime(int minutes, int seconds) {
+    _minutes = minutes;
+    _seconds = seconds;
+  }
+}
+
 // Exceptions
 class AddTimerException implements Exception { }
 class RemoveTimerException implements Exception {

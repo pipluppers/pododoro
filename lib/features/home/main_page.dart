@@ -3,64 +3,41 @@ import 'package:pododoro/features/countdown_page/countdown_page.dart';
 import 'package:pododoro/features/home/home_page.dart';
 import 'package:pododoro/features/home/timer_page.dart';
 import 'package:pododoro/constants.dart';
-import 'package:get_it/get_it.dart' show GetIt;
 import 'package:pododoro/utilities.dart' show AlarmAction, TimerState;
 import 'package:pododoro/data_management/database_service.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  final List<ITimer> timers;
+
+  const MainPage({
+    super.key,
+    required this.timers,
+  });
 
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
-  late Future<ITimer> _activeTimerFuture;
   late ITimer _activeTimer;
-  final List<ITimer> _timers = <ITimer>[];
+  late List<ITimer> _timers;
   int _currentPageIndex = 0;
-  final List<Widget> _pages = <Widget>[];
   TimerState _timerState = TimerState.work;
+
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
     super.initState();
 
-    _activeTimerFuture = _initializeTimers();
+    // There should never be 0 timers. The default timer is not editable.
+    assert(widget.timers.isNotEmpty);
+    _timers = widget.timers;
+    _activeTimer = _timers[0];
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _activeTimerFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else {
-          return _generatePage();
-        }
-      },
-    );
-  }
-
-  /// Get all existing timers from internal database. If there are no existing timers, then add the default one to the database.
-  Future<ITimer> _initializeTimers() async {
-    DatabaseService databaseService = GetIt.I<DatabaseService>();
-
-    var existingTimers = await databaseService.getAllTimers();
-
-    setState(() {
-      _timers.addAll(existingTimers);
-      _activeTimer = _timers[0];
-    });
-
-    return _timers[0];
-  }
-
-  /// Constructs the main page.
-  ///
-  /// Updates the _pages member with the home page and the timer page.
-  Scaffold _generatePage() {
     final int totalMinutes, totalSeconds;
 
     if (_timerState == TimerState.work) {
@@ -73,13 +50,6 @@ class _MainPageState extends State<MainPage> {
 
     final String currentTimerType = _timerState == TimerState.work ? "Work" : "Rest";
 
-    if (_pages.isNotEmpty) {
-      _pages.clear();
-    }
-
-    _pages.add(HomePage(currentTimerType: currentTimerType, minutes: totalMinutes, seconds: totalSeconds, startCountdown: _startCountdown,));
-    _pages.add(TimerPage(timers: _timers, activeTimerName: _activeTimer.name, onSelectTimer: _setActiveTimer));
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -87,7 +57,17 @@ class _MainPageState extends State<MainPage> {
         iconTheme: IconThemeData(color: Colors.white),
       ),
       backgroundColor: Constants.mainPageBackgroundColor,
-      body: _pages[_currentPageIndex],
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (value) {
+          // Update the UI to show which NavigationDestination is active
+          setState(() => _currentPageIndex = value);
+        },
+        children: [
+          HomePage(currentTimerType: currentTimerType, minutes: totalMinutes, seconds: totalSeconds, startCountdown: _startCountdown,),
+          TimerPage(timers: _timers, activeTimerName: _activeTimer.name, onSelectTimer: _setActiveTimer),
+        ]
+      ),
       bottomNavigationBar: NavigationBar(
         indicatorColor: const Color.fromARGB(255, 120, 128, 121),
         destinations: [
@@ -102,7 +82,7 @@ class _MainPageState extends State<MainPage> {
           ),
         ],
         selectedIndex: _currentPageIndex,
-        onDestinationSelected: (value) => setState(() => _currentPageIndex = value),
+        onDestinationSelected: (value) =>_pageController.jumpToPage(value),
         backgroundColor: Colors.black,
       ),
     );

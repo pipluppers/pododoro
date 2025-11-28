@@ -64,7 +64,53 @@ class PododoroTimerApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MainPage(),
+      home: const InitialPage(),
     );
+  }
+}
+
+class InitialPage extends StatefulWidget {
+  const InitialPage({super.key});
+
+  @override
+  State<StatefulWidget> createState() => _InitialPageState();
+}
+
+class _InitialPageState extends State<InitialPage> {
+  late Future<ITimer?> _activeTimerFuture;
+  final List<ITimer> _timers = <ITimer>[];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _activeTimerFuture = _initializeTimers();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _activeTimerFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else {
+          return MainPage(timers: _timers);
+        }
+      },
+    );
+  }
+
+  /// Get all existing timers from internal database. If there are no existing timers, then add the default one to the database.
+  Future<ITimer> _initializeTimers() async {
+    DatabaseService databaseService = GetIt.I<DatabaseService>();
+
+    var existingTimers = await databaseService.getAllTimers();
+
+    setState(() {
+      _timers.addAll(existingTimers);
+    });
+
+    return _timers[0];
   }
 }

@@ -30,6 +30,8 @@ class _HomePageState extends State<HomePage> {
                 shape: const CircleBorder(),
                 minimumSize: const Size(200, 200),
                 backgroundColor: Constants.mainPageComplementColor,
+                elevation: 8.0,
+                shadowColor: Constants.mainPageComplementShadowColor,
               ),
               child: TimerInfoWidget(text: widget.currentTimerType, minutes: widget.minutes, seconds: widget.seconds,),
             ),

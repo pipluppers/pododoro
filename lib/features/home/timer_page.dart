@@ -37,11 +37,6 @@ class _TimerPageState extends State<TimerPage> {
 
     return Scaffold(
       backgroundColor: Constants.mainPageBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: const Text("Timers", style: TextStyle(color: Colors.white),),
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
       body: Container(
         margin: EdgeInsets.only(top: 10.0),
         child: ListView.separated(

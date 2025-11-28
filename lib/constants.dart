@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class Constants {
   static const Color mainPageBackgroundColor = Color(0xCFF3E5AB);
   static const Color mainPageComplementColor = Color(0xAF5D4037);
+  static const Color mainPageComplementShadowColor = Color.fromARGB(174, 48, 33, 28);
   static const Color mainPageComplementTextColor = Colors.white;
   static const Color selectedTimerTileColor = Colors.red;
   static const Color removeTimerSwipeColor = Colors.red;

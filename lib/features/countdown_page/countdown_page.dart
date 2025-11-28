@@ -4,9 +4,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pododoro/constants.dart' show Constants;
 import 'package:pododoro/main.dart' show localNotificationsPlugin, appPlatform;
 import 'package:pododoro/features/alarm_page/alarm_page.dart';
-import 'package:pododoro/features/home/home_page.dart' show TimerInfoWidget;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:pododoro/utilities.dart' show AppPlatform;
+import 'package:pododoro/utilities.dart' show AppPlatform, TimeCounter, Utilities;
 import 'package:timezone/data/latest.dart' as tz_latest;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -22,9 +21,10 @@ class CountdownPage extends StatefulWidget {
 }
 
 class _CountdownPageState extends State<CountdownPage> {
+  final Stopwatch _stopwatch = Stopwatch();
   late Timer _mainTimer;
-  late int _remainingMinutes;
-  late int _remainingSeconds;
+  late int _totalSeconds;
+  final ValueNotifier<TimeCounter> _timeNotifier = ValueNotifier<TimeCounter>(TimeCounter(0, 0));
 
   IconData _pauseResumeIcon = Constants.pauseIcon;
   final ButtonStyle _iconButtonStyle = const ButtonStyle(iconSize: WidgetStatePropertyAll(50));
@@ -33,9 +33,9 @@ class _CountdownPageState extends State<CountdownPage> {
   void initState() {
     super.initState();
 
-    _remainingMinutes = widget.minutes;
-    _remainingSeconds = widget.seconds;
-    _mainTimer = _createMainTimer();
+    _timeNotifier.value = TimeCounter(widget.minutes, widget.seconds);
+    _totalSeconds = (widget.minutes * 60) + widget.seconds;
+    _startTimer();
     _sendNotification(true);
   }
 
@@ -48,21 +48,36 @@ class _CountdownPageState extends State<CountdownPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              TimerInfoWidget(text: widget.currentTimerType, minutes: _remainingMinutes, seconds: _remainingSeconds),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ValueListenableBuilder<TimeCounter>(
+                    valueListenable: _timeNotifier,
+                    builder: (context, value, child) {
+                      return Text(
+                        '${widget.currentTimerType}\n${Utilities.getTimeUnitDisplay(value.minutes, value.seconds)}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Constants.mainPageComplementTextColor,
+                          fontWeight: FontWeight.normal,
+                          fontSize: 50,
+                        )
+                      );
+                    }
+                  ),
+                ],
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Container(
-                    margin: const EdgeInsets.all(10),
-                    child: IconButton(
-                      onPressed: () => _remainingSeconds > 0 ? _pauseTimer() : null,
-                      icon: Icon(_pauseResumeIcon),
-                      style: _iconButtonStyle
-                    )
+                  IconButton(
+                    onPressed: () => _totalSeconds - _stopwatch.elapsed.inSeconds > 0 ? _pauseTimer() : null,
+                    icon: Icon(_pauseResumeIcon),
+                    style: _iconButtonStyle
                   ),
                   IconButton(
                     onPressed: () {
-                      _mainTimer.cancel();
+                      _stopTimer();
                       Navigator.pop(context);
                     },
                     icon: const Icon(Icons.cancel),
@@ -80,7 +95,13 @@ class _CountdownPageState extends State<CountdownPage> {
   @override
   void dispose() {
     super.dispose();
-    _mainTimer.cancel();
+    _stopTimer();
+    _timeNotifier.dispose();
+  }
+
+  /// Gets the remaining time in seconds.
+  int get _remainingSeconds {
+    return _totalSeconds - _stopwatch.elapsed.inSeconds;
   }
 
   /// Request permission to send notifications. If denied, then do not ask again.
@@ -112,7 +133,7 @@ class _CountdownPageState extends State<CountdownPage> {
 
     if (usesChronometer) {
       tz_latest.initializeTimeZones();
-      tz.TZDateTime time = tz.TZDateTime.now(tz.local).add(Duration(minutes: _remainingMinutes, seconds: _remainingSeconds));
+      tz.TZDateTime time = tz.TZDateTime.now(tz.local).add(Duration(minutes: _timeNotifier.value.minutes, seconds: _timeNotifier.value.seconds));
       when = time.millisecondsSinceEpoch;
       chronometerCountDown = true;
     }
@@ -142,24 +163,19 @@ class _CountdownPageState extends State<CountdownPage> {
   }
 
   /// Creates a timer object based on the remaining seconds.
-  Timer _createMainTimer() {
-    return Timer.periodic(
+  void _startTimer() {
+    _stopwatch.start();
+
+    _mainTimer = Timer.periodic(
       const Duration(seconds: 1), // Fires every second
       (timer) async {
-        setState(() {
-          if (_remainingSeconds > 0) {
-              _remainingSeconds--;
-          } else {
-            if (_remainingMinutes > 0) {
-              _remainingMinutes--;
-              _remainingSeconds = 59;
-            } else {
-              timer.cancel();
-            }
-          }
-        });
+        var remainingSeconds = _remainingSeconds;
 
-        if (!timer.isActive) {
+        _timeNotifier.value = TimeCounter(remainingSeconds ~/ 60, remainingSeconds % 60);
+
+        if (remainingSeconds <= 0) {
+          timer.cancel();
+
           final navigator = Navigator.of(context);
 
           var result = await Navigator.push(
@@ -180,12 +196,12 @@ class _CountdownPageState extends State<CountdownPage> {
     setState(() {
       if (_pauseResumeIcon == Constants.pauseIcon) {
         _pauseResumeIcon = Constants.resumeIcon;
-        _mainTimer.cancel();
+        _stopTimer();
       } else {
         _pauseResumeIcon = Constants.pauseIcon;
 
         if (_remainingSeconds > 0) {
-          _mainTimer = _createMainTimer();
+          _startTimer();
         }
       }
     });
@@ -195,6 +211,12 @@ class _CountdownPageState extends State<CountdownPage> {
     } else {
       _sendNotification(false);
     }
+  }
+
+  /// Stops the stopwatch and cancels the timer.
+  void _stopTimer() {
+    _mainTimer.cancel();
+    _stopwatch.stop();
   }
 
 }
