@@ -9,6 +9,8 @@ import 'package:timezone/data/latest.dart' as tz_latest;
 import 'package:timezone/timezone.dart' as tz;
 
 /// Handles sending local notifications to the user's device.
+/// 
+/// Currently, the id of the local notification will be 0 due to this being the only notification sent by the app.
 class NotificationController {
   final TimerController _timerController;
 
@@ -56,6 +58,11 @@ class NotificationController {
         )
       ),
     );
+  }
+
+  /// Hides the local notification.
+  Future<void> hideNotification() async {
+    await localNotificationsPlugin.cancel(0);
   }
 
   /// Request permission to send notifications. If denied, then do not ask again.

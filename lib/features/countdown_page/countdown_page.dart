@@ -85,6 +85,7 @@ class _CountdownPageState extends State<CountdownPage> {
                     // Cancel button
                     onPressed: () {
                       _timerController.stopTimer();
+                      _notificationController.hideNotification();
                       Navigator.pop(context);
                     },
                     icon: const Icon(Icons.cancel),
@@ -107,6 +108,9 @@ class _CountdownPageState extends State<CountdownPage> {
 
   /// Switches the active page to the alarm page.
   Future<void> activateAlarmPage() async {
+    // This does not need to be awaited here
+    _notificationController.hideNotification();
+
     final navigator = Navigator.of(context);
 
     var result = await Navigator.push(
