@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+
 import 'package:pododoro/constants.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pododoro/resources/string_resources.dart';
 import 'package:pododoro/utilities.dart' show AddTimerException, Utilities;
+
+import 'package:fluttertoast/fluttertoast.dart';
 
 class AddTimerWidget extends StatefulWidget {
   final Function(String, int, int, int, int) onAdd;
@@ -41,7 +44,7 @@ class _AddTimerWidgetState extends State<AddTimerWidget> {
           mainAxisSize: MainAxisSize.min, // prevents the dialog from taking up the whole screen
           children: [
             TimerRow(
-              header: "Name",
+              header: StringResources.name,
               child: TextField(
                 onChanged: (value) => _name = value,
                 keyboardType: TextInputType.text,
@@ -51,14 +54,14 @@ class _AddTimerWidgetState extends State<AddTimerWidget> {
               )
             ),
             TimerRow(
-              header: "How long to work?",
+              header: StringResources.workTimeText,
               child: NewTimer(
                 onMinutesChanged: (value) => _workMinutes = int.tryParse(value),
                 onSecondsChanged: (value) => _workSeconds = int.tryParse(value),
               ),
             ),
             TimerRow(
-              header: "How long to rest?",
+              header: StringResources.restTimeText,
               child: NewTimer(
                 onMinutesChanged: (value) => _restMinutes = int.tryParse(value),
                 onSecondsChanged: (value) => _restSeconds = int.tryParse(value),
@@ -101,19 +104,19 @@ class _AddTimerWidgetState extends State<AddTimerWidget> {
 
     if (_name == null || _name!.isEmpty) {
       success = false;
-      errorMessages.add("Invalid name.");
+      errorMessages.add(StringResources.invalidNameErrorMessage);
     }
 
     if (_workMinutes == null || _workMinutes! < 0 || _workMinutes! > 59 ||
       _workSeconds == null || _workSeconds! < 0 || _workSeconds! > 59 || (_workMinutes! == 0 && _workSeconds! == 0)) {
       success = false;
-      errorMessages.add("Invalid work timer.");
+      errorMessages.add(StringResources.invalidWorkTimeErrorMessage);
     }
 
     if (_restMinutes == null || _restMinutes! < 0 || _restMinutes! > 59 ||
       _restSeconds == null || _restSeconds! < 0 || _restSeconds! > 59 || (_restMinutes! == 0 && _restSeconds! == 0)) {
       success = false;
-      errorMessages.add("Invalid rest timer.");
+      errorMessages.add(StringResources.invalidRestTimeErrorMessage);
     }
 
     return (success, errorMessages.join('\n'));

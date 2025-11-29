@@ -3,6 +3,7 @@ import 'package:pododoro/features/countdown_page/countdown_page.dart';
 import 'package:pododoro/features/home/home_page.dart';
 import 'package:pododoro/features/home/timer_page.dart';
 import 'package:pododoro/constants.dart';
+import 'package:pododoro/resources/string_resources.dart';
 import 'package:pododoro/utilities.dart' show AlarmAction, TimerState;
 import 'package:pododoro/data_management/database_service.dart';
 
@@ -48,7 +49,7 @@ class _MainPageState extends State<MainPage> {
       totalSeconds = _activeTimer.totalRestSeconds;
     }
 
-    final String currentTimerType = _timerState == TimerState.work ? "Work" : "Rest";
+    final String currentTimerType = _timerState == TimerState.work ? StringResources.work : StringResources.rest;
 
     return Scaffold(
       appBar: AppBar(
@@ -69,16 +70,16 @@ class _MainPageState extends State<MainPage> {
         ]
       ),
       bottomNavigationBar: NavigationBar(
-        indicatorColor: const Color.fromARGB(255, 120, 128, 121),
+        indicatorColor: Constants.bottomNavigationBarColor,
         destinations: [
           NavigationDestination(
             selectedIcon: Icon(Icons.home),
             icon: Icon(Icons.home_outlined),
-            label: "Home",
+            label: StringResources.bottomNavigationBarHome,
           ),
           NavigationDestination(
             icon: Icon(Icons.timelapse),
-            label: "Timers",
+            label: StringResources.bottomNavigationBarTimers,
           ),
         ],
         selectedIndex: _currentPageIndex,
@@ -96,11 +97,11 @@ class _MainPageState extends State<MainPage> {
 
     do {
       if (_timerState == TimerState.work) {
-        timerType = "Work";
+        timerType = StringResources.work;
         totalMinutes = _activeTimer.totalWorkMinutes;
         totalSeconds = _activeTimer.totalWorkSeconds;
       } else {
-        timerType = "Rest";
+        timerType = StringResources.rest;
         totalMinutes = _activeTimer.totalRestMinutes;
         totalSeconds = _activeTimer.totalRestSeconds;
       }
