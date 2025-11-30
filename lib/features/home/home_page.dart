@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'package:pododoro/constants.dart' show Constants;
 import 'package:pododoro/utilities.dart' show Utilities;
 
+/// Represents the second page on the main page.
+/// 
+/// Displays the button to start the pododoro timer.
 class HomePage extends StatefulWidget {
   final String currentTimerType;
   final int minutes;

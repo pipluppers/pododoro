@@ -15,6 +15,10 @@ class Constants {
   static const IconData resumeIcon = Icons.play_arrow_rounded;
   static const IconData cancelIcon = Icons.cancel;
 
+  static const double timerSeparation = 12.0;
+  static const double timerPadding = 16.0;
+  static const double timerBorderRadius = 16.0;
+
   static const String defaultTimerName = 'Pododoro timer';
   static const int defaultTimerWorkMinutes = 25;
   static const int defaultTimerWorkSeconds = 0;

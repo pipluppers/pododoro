@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+
+import 'package:pododoro/constants.dart';
+import 'package:pododoro/data_management/database_service.dart';
 import 'package:pododoro/features/countdown_page/countdown_page.dart';
 import 'package:pododoro/features/home/home_page.dart';
 import 'package:pododoro/features/home/timer_page.dart';
-import 'package:pododoro/constants.dart';
 import 'package:pododoro/resources/string_resources.dart';
 import 'package:pododoro/utilities.dart' show AlarmAction, TimerState;
-import 'package:pododoro/data_management/database_service.dart';
 
+/// Represents the landing page of the app.
+/// 
+/// Consists of two internal pages: HomePage and TimerPage.
 class MainPage extends StatefulWidget {
   final List<ITimer> timers;
 

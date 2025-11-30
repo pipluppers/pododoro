@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:pododoro/constants.dart';
 import 'package:pododoro/data_management/database_service.dart';
+import 'package:pododoro/features/home/add_timer.dart';
+import 'package:pododoro/features/home/timer_tile.dart';
 import 'package:pododoro/resources/string_resources.dart';
 import 'package:pododoro/utilities.dart' show Utilities;
-import 'package:pododoro/features/home/add_timer.dart';
+
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart' show GetIt;
 
+/// Represents the second page on the main page.
+/// 
+/// Displays the collection of timers.
 class TimerPage extends StatefulWidget {
   final List<ITimer> timers;
   final Function(String) onSelectTimer;
@@ -78,51 +84,22 @@ class _TimerPageState extends State<TimerPage> {
 
                 return true;
               },
-              child: ListTile(
-                title: Text(
-                  widget.timers[index].name,
-                  style: const TextStyle(color: Constants.mainPageComplementTextColor,),
-                ),
-                subtitle: Text(
-                  Utilities.getTimeUnitDisplay(widget.timers[index].totalWorkMinutes, widget.timers[index].totalWorkSeconds),
-                  style: const TextStyle(color: Constants.mainPageComplementTextColor,),
-                ),
+              child: TimerTile(
+                timer: widget.timers[index],
                 onTap: () {
                   setState(() => _selectedIndex = index);
                   widget.onSelectTimer(widget.timers[index].name);
                 },
-                onLongPress: () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ListTile(
-                            title: const Text("Delete"),
-                            onTap: () {
-                              _removeTimerById(widget.timers[index].id);
-                              Navigator.pop(context);
-                            },
-                          ),
-                        ]
-                      );
-                    }
-                  );
+                removeTimer: () {
+                  _removeTimerById(widget.timers[index].id);
+                  Navigator.pop(context);
                 },
-                selected: isSelected,
-                selectedColor: Colors.orange,
-                selectedTileColor: Constants.selectedTimerTileColor,
-                tileColor: Constants.mainPageComplementColor,
-                leading: Icon(Icons.timelapse),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)
-                ),
+                isSelected: isSelected,
               ),
             );
           },
           separatorBuilder: (BuildContext context, int index) {
-            return SizedBox(height: 10.0,);
+            return SizedBox(height: Constants.timerSeparation,);
           },
         ),
       ),

@@ -9,10 +9,11 @@ class StringResources {
   static String removeDefaultTimerErrorMessage = '${Constants.defaultTimerName} may not be deleted.';
 
   // Add timer
-  static String name = "Name";
-  static String workTimeText = "How long to work?";
-  static String restTimeText = "How long to rest?";
-  static String invalidNameErrorMessage = "Invalid name.";
-  static String invalidWorkTimeErrorMessage = "Invalid work time.";
-  static String invalidRestTimeErrorMessage = "Invalid rest time.";
+  static const String name = "Name";
+  static const String workTimeText = "How long to work?";
+  static const String restTimeText = "How long to rest?";
+  static const String invalidNameErrorMessage = "Invalid name.";
+  static const String invalidWorkTimeErrorMessage = "Invalid work time.";
+  static const String invalidRestTimeErrorMessage = "Invalid rest time.";
+  static const String delete = "Delete";
 }
