@@ -112,12 +112,26 @@ class _MainPageState extends State<MainPage> {
 
       result = await Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => CountdownPage(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => CountdownPage(
             currentTimerType: timerType,
             minutes: totalMinutes,
-            seconds: totalSeconds,
-          )
+            seconds: totalSeconds
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final curve = Curves.fastOutSlowIn;
+            CurvedAnimation curvedAnimation = CurvedAnimation(
+              parent: animation,
+              curve: curve
+            );
+
+            return FadeTransition(
+              opacity: curvedAnimation,
+              child: child,
+            );
+          },
+          transitionDuration: Duration(seconds: 3),
+          reverseTransitionDuration: Duration(seconds: 1),
         )
       );
 

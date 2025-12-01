@@ -103,6 +103,7 @@ class _CountdownPageState extends State<CountdownPage> {
   @override
   void dispose() {
     super.dispose();
+    _notificationController.hideNotification();
     _timerController.dispose();
   }
 
